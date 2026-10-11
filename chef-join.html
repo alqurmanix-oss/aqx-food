@@ -26,7 +26,7 @@
 <style>
 :root{--w:#fff;--iv:#F8F7F2;--t:#087F8C;--td:#066571;--sky:#DDF5F7;--g:#C6A15B;--gl:#efe3c6;--ink:#243746;--mu:#64748B;--ln:#E4E9ED;--ok:#177a4a;--er:#b8332b;--wr:#9a6a10}
 *,*::before,*::after{box-sizing:border-box;margin:0;min-width:0}
-html{scroll-behavior:smooth;max-width:100%;overflow-x:clip;-webkit-text-size-adjust:100%;scroll-padding-top:84px}
+html{scroll-behavior:smooth;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;scroll-padding-top:84px}
 body{font-family:Tajawal,Cairo,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink);background:var(--w);line-height:1.75;max-width:100%;overflow-x:clip;min-height:100vh}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(800px 480px at 90% -8%,var(--sky),transparent 70%),radial-gradient(700px 420px at -5% 35%,#f5ecd3,transparent 70%),linear-gradient(var(--w),var(--iv))}
 svg.i{width:1.2em;height:1.2em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -70,7 +70,7 @@ header{position:sticky;top:0;z-index:50;background:#ffffffe6;backdrop-filter:blu
 .g1{top:8%;inset-inline-start:2%}
 .steam{animation:st 4s ease-in-out infinite}.steam:nth-of-type(2){animation-delay:1.3s}
 @keyframes st{0%,100%{opacity:.25;transform:translateY(4px)}50%{opacity:.8;transform:translateY(-4px)}}
-.sec{margin:34px 0}
+.sec{margin-block:34px}
 .sec>h2{font-size:clamp(1.4rem,4.5vw,1.9rem);font-weight:800;text-align:center}
 .sec>h2::after{content:"";display:block;width:64px;height:3px;border-radius:9px;margin:10px auto 0;background:linear-gradient(90deg,var(--t),var(--g))}
 .feat{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:22px}
@@ -164,7 +164,7 @@ dialog::backdrop{background:rgba(221,245,247,.78);backdrop-filter:blur(10px)}
 .sg{font-family:"Aref Ruqaa","Great Vibes",cursive;font-size:2rem;color:var(--g);line-height:1.5;display:block}
 [lang=en] .sg,[lang=es] .sg{font-family:"Great Vibes","Aref Ruqaa",cursive;font-size:2.3rem}
 .hero{position:relative}
-.hero::before{content:"";position:absolute;top:-30px;inset-inline-end:-70px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,#efe3c6aa,transparent 65%);filter:blur(30px);z-index:-1;animation:aur 12s ease-in-out infinite alternate}
+.hero::before{content:"";position:absolute;top:-30px;inset-inline-end:0;width:min(420px,80vw);height:min(420px,80vw);border-radius:50%;background:radial-gradient(circle,#efe3c6aa,transparent 65%);filter:blur(30px);z-index:-1;animation:aur 12s ease-in-out infinite alternate}
 @keyframes aur{to{transform:translate(-40px,36px) scale(1.15)}}
 .tw{transform-box:fill-box;transform-origin:center;animation:twk 2.8s ease-in-out infinite}@keyframes twk{0%,100%{opacity:.25;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
 .jr{list-style:none;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:40px 14px;margin-top:40px}
@@ -176,6 +176,41 @@ dialog::backdrop{background:rgba(221,245,247,.78);backdrop-filter:blur(10px)}
 .card,.prev{transition:box-shadow .3s}
 .card:focus-within{box-shadow:0 36px 80px -30px rgba(8,127,140,.6)}
 @media(min-width:820px){.jr{grid-template-columns:repeat(3,minmax(0,1fr))}}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.07;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='88' height='88' viewBox='0 0 88 88'%3E%3Cg fill='none' stroke='%23C6A15B' stroke-width='1'%3E%3Cpath d='M44 6l9 22 22-9-9 22 22 9-22 9 9 22-22-9-9 22-9-22-22 9 9-22-22-9 22-9-9-22 22 9z'/%3E%3Ccircle cx='44' cy='44' r='10'/%3E%3C/g%3E%3C/svg%3E")}
+.hero{isolation:isolate}
+.dust{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:-1}
+.dust i{position:absolute;bottom:-12px;width:var(--s);height:var(--s);border-radius:50%;background:radial-gradient(circle,#f5e6bd,#C6A15B);box-shadow:0 0 10px #C6A15B88;opacity:0;animation:dust var(--d) linear var(--dl) infinite}
+@keyframes dust{10%{opacity:.9}90%{opacity:.5}100%{transform:translateY(-520px) translateX(24px);opacity:0}}
+.hero h1{background-image:linear-gradient(100deg,#243746 0%,#087F8C 28%,#C6A15B 50%,#087F8C 72%,#243746 100%);background-size:250% 100%;animation:foil 10s ease-in-out infinite alternate}
+@keyframes foil{to{background-position:100% 0}}
+.art svg.pl{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out}
+.orb{transform-box:fill-box;transform-origin:center;animation:spin 70s linear infinite}
+.g2{bottom:10%;inset-inline-end:0}
+.card,.prev,.mod{border:1.5px solid transparent}
+.card{background:linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#efe3c6,#C6A15B 35%,#14a3b0 70%,#efe3c6) border-box}
+.prev{position:relative;background:linear-gradient(160deg,#fff,#DDF5F7) padding-box,linear-gradient(135deg,#efe3c6,#C6A15B 40%,#14a3b0 80%) border-box}
+.mod{background:linear-gradient(180deg,#fff,#f6fbfb) padding-box,linear-gradient(135deg,#efe3c6,#C6A15B 35%,#14a3b0 70%,#efe3c6) border-box}
+.spot{position:relative}
+.spot::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(280px circle at var(--mx,50%) var(--my,0),rgba(198,161,91,.2),transparent 60%)}
+.spot:hover::after{opacity:1}
+.ico{box-shadow:0 12px 24px -10px #a8832f}
+.sec>h2::after{width:140px;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent)}
+.mq{overflow:hidden;margin:14px 0;border-block:1px solid var(--gl);background:linear-gradient(90deg,#fff,#fbf4e1,#fff);padding:12px 0}
+.mt{display:flex;gap:34px;width:max-content;animation:mq 46s linear infinite}
+[dir=rtl] .mt{animation-name:mqr}
+.mt span{font-weight:800;color:var(--td);white-space:nowrap;display:flex;align-items:center;gap:34px}
+.mt span::after{content:"";width:7px;height:7px;background:var(--g);transform:rotate(45deg);flex:none}
+@keyframes mq{to{transform:translateX(-50%)}}@keyframes mqr{to{transform:translateX(50%)}}
+footer{position:relative;background:linear-gradient(180deg,#fff,#eef9f8)}
+footer::before{content:"";position:absolute;top:-1px;inset-inline:0;height:2px;background:linear-gradient(90deg,transparent,var(--g),var(--t),var(--g),transparent)}
+.send{width:100%;min-height:60px;font-size:1.15rem;animation:glow 3s ease-in-out infinite}
+.send svg{width:1.3em;height:1.3em}[dir=rtl] .send svg{transform:scaleX(-1)}
+.cta .btn.pri{animation:glow 3s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 16px 30px -12px var(--t),0 0 0 8px #14a3b01f}}
+.spin[hidden]{display:none}
+.st{display:flex;gap:8px;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:var(--wr);min-height:1.4em;margin-top:10px}
+.hp{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+@media(max-width:520px){.tools .btn{display:none}.g2{display:none}.mt{gap:24px}.mt span{gap:24px}}
 </style>
 </head>
 <body>
@@ -192,7 +227,7 @@ dialog::backdrop{background:rgba(221,245,247,.78);backdrop-filter:blur(10px)}
 <symbol id="sh" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
 <symbol id="star" viewBox="0 0 24 24"><path d="M12 3l2.6 5.600 6.100.7-4.500 4.200 1.200 6L12 16.500 6.600 19.500l1.200-6L3.300 9.300l6.100-.7z"/></symbol>
 <symbol id="pen" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></symbol>
-<symbol id="send" viewBox="0 0 24 24"><path d="M21 3L3 10.500l7 2.500 2.500 7z"/><path d="M10 13l11-10"/></symbol>
+<symbol id="ico-send" viewBox="0 0 24 24"><path d="M21 3L3 10.500l7 2.500 2.500 7z"/><path d="M10 13l11-10"/></symbol>
 <symbol id="gl" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
 </defs></svg>
 
@@ -207,6 +242,7 @@ dialog::backdrop{background:rgba(221,245,247,.78);backdrop-filter:blur(10px)}
 
 <main id="top0">
 <section class="wrap hero">
+<div class="dust" id="dust" aria-hidden="true"></div>
 <div>
 <span class="eyebrow"><svg class="i"><use href="#star"/></svg><span data-i="eyebrow">طهاة القرماني إكس | AQX CHEFS</span></span>
 <h1 data-i="h1">موهبتك تستحق أن يراها العالم</h1>
@@ -217,7 +253,7 @@ dialog::backdrop{background:rgba(221,245,247,.78);backdrop-filter:blur(10px)}
 </div>
 <div class="art" aria-hidden="true">
 <svg class="pl" viewBox="0 0 320 300"><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a3b0"/><stop offset="1" stop-color="#066571"/></linearGradient><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe3c6"/><stop offset="1" stop-color="#C6A15B"/></linearGradient><radialGradient id="c"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#DDF5F7"/></radialGradient></defs>
-<circle cx="160" cy="150" r="136" fill="#DDF5F7" opacity=".7"/><circle cx="160" cy="150" r="136" fill="none" stroke="url(#b)" stroke-width="2" stroke-dasharray="2 10"/>
+<circle cx="160" cy="150" r="136" fill="#DDF5F7" opacity=".7"/><circle cx="160" cy="150" r="136" fill="none" stroke="url(#b)" stroke-width="2" stroke-dasharray="2 10" class="orb"/>
 <ellipse cx="160" cy="226" rx="116" ry="22" fill="#087F8C" opacity=".12"/>
 <ellipse cx="160" cy="214" rx="112" ry="26" fill="url(#c)" stroke="url(#b)" stroke-width="3"/><ellipse cx="160" cy="212" rx="84" ry="17" fill="none" stroke="#C6A15B" stroke-opacity=".5"/>
 <path d="M76 206a84 84 0 0 1 168 0z" fill="url(#a)"/><path d="M96 200a66 66 0 0 1 40-52" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>
@@ -225,14 +261,17 @@ dialog::backdrop{background:rgba(221,245,247,.78);backdrop-filter:blur(10px)}
 <path class="steam" d="M120 96c-10-12 10-18 0-32M160 82c-10-12 10-18 0-32M200 96c-10-12 10-18 0-32" fill="none" stroke="#087F8C" stroke-width="4" stroke-linecap="round" opacity=".5"/>
 <path class="tw" d="M262 58l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#C6A15B"/><path class="tw" style="animation-delay:.9s" d="M52 70l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#14a3b0"/><path class="tw" style="animation-delay:1.6s" d="M282 150l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#C6A15B"/><path d="M40 232c-8-24 0-44 22-58 4 26-2 46-22 58z" fill="#14a3b0" opacity=".75"/><path d="M286 226c10-22 4-44-16-58-6 24-2 44 16 58z" fill="#C6A15B" opacity=".8"/></svg>
 <div class="glass g1"><svg class="i"><use href="#star"/></svg><span data-i="g1">تخصصاتك</span></div>
+<div class="glass g2"><svg class="i"><use href="#sh"/></svg><span data-i="g2">مراجعة دقيقة</span></div>
 </div>
 </section>
+
+<div class="mq" aria-hidden="true"><div class="mt" id="mt"></div></div>
 
 <section class="wrap sec rv" id="how"><h2 data-i="featT">ثلاث خطوات بسيطة</h2>
 <div class="feat">
 <div><span class="ico"><svg class="i"><use href="#star"/></svg></span><h3 data-i="f1t">اعرض تخصصك</h3><p data-i="f1d">عرّف الآخرين بمجالات الطهي التي تتقنها.</p></div>
 <div><span class="ico"><svg class="i"><use href="#pen"/></svg></span><h3 data-i="f2t">شارك خبرتك</h3><p data-i="f2d">قدّم نبذة عن تجربتك ومهاراتك.</p></div>
-<div><span class="ico"><svg class="i"><use href="#send"/></svg></span><h3 data-i="f3t">قدّم طلبك بسهولة</h3><p data-i="f3d">أدخل بياناتك وأرسل طلب الانضمام إلكترونيًا.</p></div>
+<div><span class="ico"><svg class="i"><use href="#ico-send"/></svg></span><h3 data-i="f3t">قدّم طلبك بسهولة</h3><p data-i="f3d">أدخل بياناتك وأرسل طلب الانضمام إلكترونيًا.</p></div>
 </div></section>
 
 <section class="wrap sec rv" id="journey"><h2 data-i="jT">رحلتك معنا</h2>
@@ -273,7 +312,9 @@ dialog::backdrop{background:rgba(221,245,247,.78);backdrop-filter:blur(10px)}
 <datalist id="ccs"></datalist><div class="err" id="wcc-e"></div><div class="err" id="wn-e"></div></div>
 <div class="help full" data-i="wH">رقم واتساب مطلوب فقط عند الموافقة على التواصل.</div>
 
-<div class="full"><button type="submit" class="btn pri" id="send" style="width:100%;min-height:58px;font-size:1.1rem"></button>
+<div class="full"><div class="hp" aria-hidden="true"><label>Leave empty<input id="website" name="website" tabindex="-1" autocomplete="off"></label></div>
+<button type="submit" class="btn pri send" id="send"><svg class="i"><use href="#ico-send"/></svg><span class="spin" id="sps" hidden></span><span id="sendL" data-i="send">إرسال طلب الانضمام</span></button>
+<div class="st" id="form-s" aria-live="polite"></div>
 <p class="legal" data-i="legal">يتحقق الخادم من بياناتك مرة أخرى قبل تسجيل الطلب.</p></div>
 </form></div>
 
@@ -328,11 +369,11 @@ const TIMEOUT_MS = 25000;
 
 const T = {
 ar:{home:"الرئيسية",blog:"مجلة AQX للطهي",start:"ابدأ طلب الانضمام",eyebrow:"طهاة القرماني إكس | AQX CHEFS",h1:"موهبتك تستحق أن يراها العالم",
-sub:"قدّم طلبك للانضمام إلى طهاة AQX، وعرّفنا بتخصصاتك وخبراتك في عالم الطعام.",cta:"انضم إلى طهاة AQX",more:"كيف يعمل؟",hnote:"يخضع كل طلب للمراجعة، ولا يعني تقديمه القبول النهائي.",g1:"تخصصاتك",
+sub:"قدّم طلبك للانضمام إلى طهاة AQX، وعرّفنا بتخصصاتك وخبراتك في عالم الطعام.",cta:"انضم إلى طهاة AQX",more:"كيف يعمل؟",hnote:"يخضع كل طلب للمراجعة، ولا يعني تقديمه القبول النهائي.",g1:"تخصصاتك",g2:"مراجعة دقيقة",
 featT:"ثلاث خطوات بسيطة",f1t:"اعرض تخصصك",f1d:"عرّف الآخرين بمجالات الطهي التي تتقنها.",f2t:"شارك خبرتك",f2d:"قدّم نبذة عن تجربتك ومهاراتك.",f3t:"قدّم طلبك بسهولة",f3d:"أدخل بياناتك وأرسل طلب الانضمام إلكترونيًا.",
 formT:"طلب الانضمام إلى طهاة AQX",formS:"أدخل بياناتك بدقة لإرسال طلبك.",meter:"اكتمل {n} من 5 حقول مطلوبة",lName:"الاسم الذي سيظهر للطهاة والزوار",lCountry:"الدولة",pick:"اختر الدولة",
 lSpec:"تخصصاتك في الطهي",lCui:"المطابخ التي تتقنها",addPh:"أضف خيارًا آخر",add:"إضافة",lBio:"نبذة عنك وخبرتك",consent:"أوافق على التواصل معي عبر واتساب",lWcc:"مفتاح الدولة",lWn:"رقم واتساب",
-wH:"رقم واتساب مطلوب فقط عند الموافقة على التواصل.",send:"إرسال طلب الانضمام",sending:"جارٍ إرسال الطلب...",legal:"يتحقق الخادم من بياناتك مرة أخرى قبل تسجيل الطلب.",
+wH:"رقم واتساب مطلوب فقط عند الموافقة على التواصل.",send:"إرسال طلب الانضمام",sending:"جارٍ إرسال الطلب...",many:"محاولات كثيرة. انتظر دقيقة ثم أعد المحاولة.",fast:"يرجى مراجعة بياناتك بهدوء ثم الإرسال.",legal:"يتحقق الخادم من بياناتك مرة أخرى قبل تسجيل الطلب.",
 prevT:"معاينة شكل ملفك",prevN:"معاينة للشكل فقط، وليست اعتمادًا للملف.",prevName:"اسمك هنا",foot:"مجتمع يجمع شغف الطهي.",top:"الصعود إلى أعلى الصفحة",
 eName:"أدخل اسمًا من حرفين على الأقل.",eCountry:"اختر الدولة.",eSpec:"اختر تخصصًا واحدًا على الأقل (بحد أقصى 500 حرف).",eCui:"اختر مطبخًا واحدًا على الأقل (بحد أقصى 500 حرف).",eBio:"اكتب نبذة من 10 أحرف على الأقل.",
 eWn:"أدخل رقم واتساب صحيحًا (من 6 إلى 15 رقمًا).",eWcc:"أدخل مفتاحًا صحيحًا مثل +20.",
@@ -352,11 +393,11 @@ q3:"ماذا يحدث بعد تسجيل طلبي؟",a3:"تظهر لك رسالة
 jT:"رحلتك معنا",j1t:"املأ بياناتك",j1d:"أدخل اسمك وتخصصاتك ومطابخك ونبذة عنك.",j2t:"يُسجَّل طلبك",j2d:"يتحقق الخادم من بياناتك ثم يسجل الطلب ويعطيك رقمه.",j3t:"انتقل إلى بوابة الحساب",j3d:"تنتقل تلقائيًا ومعك رقم طلبك.",
 stT:"ابدأ نبذتك بإحدى هذه العبارات:",stems:["بدأت الطهي منذ…","أتميز في…","أحب تقديم…"],cfgE:"تعذر قبول الطلب بسبب إعداد في الخادم. أبلغ فريق AQX وحاول لاحقًا."},
 en:{home:"Home",blog:"AQX Culinary Journal",start:"Start your application",eyebrow:"AQX CHEFS | ALQURMANI X",h1:"Your talent deserves to be seen by the world",
-sub:"Apply to join AQX chefs and tell us about your specialties and experience in the world of food.",cta:"Join AQX chefs",more:"How it works",hnote:"Every application is reviewed; submitting does not mean final acceptance.",g1:"Your specialties",
+sub:"Apply to join AQX chefs and tell us about your specialties and experience in the world of food.",cta:"Join AQX chefs",more:"How it works",hnote:"Every application is reviewed; submitting does not mean final acceptance.",g1:"Your specialties",g2:"Careful review",
 featT:"Three simple steps",f1t:"Showcase your specialty",f1d:"Let others know the culinary fields you master.",f2t:"Share your experience",f2d:"Give a short overview of your experience and skills.",f3t:"Apply with ease",f3d:"Enter your details and send your application online.",
 formT:"Apply to join AQX chefs",formS:"Enter your details carefully to send your application.",meter:"{n} of 5 required fields complete",lName:"Name shown to chefs and visitors",lCountry:"Country",pick:"Select a country",
 lSpec:"Your culinary specialties",lCui:"Cuisines you master",addPh:"Add another option",add:"Add",lBio:"About you and your experience",consent:"I agree to be contacted via WhatsApp",lWcc:"Country code",lWn:"WhatsApp number",
-wH:"A WhatsApp number is required only if you agree to be contacted.",send:"Submit application",sending:"Submitting application...",legal:"The server validates your data again before recording the application.",
+wH:"A WhatsApp number is required only if you agree to be contacted.",send:"Submit application",sending:"Submitting application...",many:"Too many attempts. Wait a minute and try again.",fast:"Please review your details calmly, then submit.",legal:"The server validates your data again before recording the application.",
 prevT:"Preview of your profile",prevN:"A visual preview only, not a profile approval.",prevName:"Your name here",foot:"A community that brings together a passion for cooking.",top:"Back to top",
 eName:"Enter a name of at least 2 characters.",eCountry:"Select a country.",eSpec:"Choose at least one specialty (500 characters max).",eCui:"Choose at least one cuisine (500 characters max).",eBio:"Write a bio of at least 10 characters.",
 eWn:"Enter a valid WhatsApp number (6 to 15 digits).",eWcc:"Enter a valid code such as +20.",
@@ -375,11 +416,11 @@ q3:"What happens after my application is recorded?",a3:"You see a success messag
 jT:"Your journey with us",j1t:"Fill in your details",j1d:"Enter your name, specialties, cuisines and a short bio.",j2t:"Your application is recorded",j2d:"The server validates your data, records the application and gives you its ID.",j3t:"Go to the account portal",j3d:"You are taken automatically, carrying your application ID.",
 stT:"Start your bio with one of these:",stems:["I started cooking…","I excel at…","I love serving…"],cfgE:"The application could not be accepted because of a server setting. Please notify the AQX team and try later."},
 es:{home:"Inicio",blog:"Revista culinaria AQX",start:"Iniciar solicitud",eyebrow:"AQX CHEFS | ALQURMANI X",h1:"Tu talento merece que el mundo lo vea",
-sub:"Solicita unirte a los chefs de AQX y cuéntanos tus especialidades y experiencia en el mundo gastronómico.",cta:"Únete a los chefs AQX",more:"Cómo funciona",hnote:"Cada solicitud se revisa; enviarla no implica aceptación final.",g1:"Tus especialidades",
+sub:"Solicita unirte a los chefs de AQX y cuéntanos tus especialidades y experiencia en el mundo gastronómico.",cta:"Únete a los chefs AQX",more:"Cómo funciona",hnote:"Cada solicitud se revisa; enviarla no implica aceptación final.",g1:"Tus especialidades",g2:"Revisión cuidadosa",
 featT:"Tres pasos sencillos",f1t:"Muestra tu especialidad",f1d:"Da a conocer los campos culinarios que dominas.",f2t:"Comparte tu experiencia",f2d:"Presenta un resumen de tu trayectoria y habilidades.",f3t:"Solicita con facilidad",f3d:"Introduce tus datos y envía tu solicitud en línea.",
 formT:"Solicitud para unirte a los chefs AQX",formS:"Introduce tus datos con cuidado para enviar tu solicitud.",meter:"{n} de 5 campos obligatorios completos",lName:"Nombre visible para chefs y visitantes",lCountry:"País",pick:"Selecciona un país",
 lSpec:"Tus especialidades culinarias",lCui:"Cocinas que dominas",addPh:"Añade otra opción",add:"Añadir",lBio:"Sobre ti y tu experiencia",consent:"Acepto que me contacten por WhatsApp",lWcc:"Prefijo",lWn:"Número de WhatsApp",
-wH:"El número de WhatsApp solo es obligatorio si aceptas el contacto.",send:"Enviar solicitud",sending:"Enviando solicitud...",legal:"El servidor valida de nuevo tus datos antes de registrar la solicitud.",
+wH:"El número de WhatsApp solo es obligatorio si aceptas el contacto.",send:"Enviar solicitud",sending:"Enviando solicitud...",many:"Demasiados intentos. Espera un minuto e inténtalo de nuevo.",fast:"Revisa tus datos con calma y luego envía.",legal:"El servidor valida de nuevo tus datos antes de registrar la solicitud.",
 prevT:"Vista previa de tu perfil",prevN:"Solo una vista previa visual, no una aprobación del perfil.",prevName:"Tu nombre aquí",foot:"Una comunidad que une la pasión por cocinar.",top:"Volver arriba",
 eName:"Introduce un nombre de al menos 2 caracteres.",eCountry:"Selecciona un país.",eSpec:"Elige al menos una especialidad (máx. 500 caracteres).",eCui:"Elige al menos una cocina (máx. 500 caracteres).",eBio:"Escribe una biografía de al menos 10 caracteres.",
 eWn:"Introduce un número de WhatsApp válido (6 a 15 dígitos).",eWcc:"Introduce un prefijo válido como +20.",
@@ -403,6 +444,17 @@ const DIAL = {EG:"+20",SA:"+966",AE:"+971",KW:"+965",QA:"+974",BH:"+973",OM:"+96
 
 const $ = id => document.getElementById(id);
 let L = "ar", busy = false, autoCc = "";
+/* ===== كمين الحماية داخل الواجهة (بدون مفاتيح أو مواقع خارجية) ===== */
+const guard = {t0:Date.now(), ev:0, tries:[], MIN_MS:4000, MIN_EV:3, MAX_TRIES:4, WINDOW:60000};
+["keydown","pointerdown","touchstart","input"].forEach(n => addEventListener(n, e => { if (e.isTrusted) guard.ev++; }, {passive:true, capture:true}));
+function guardCheck() {
+  if ($("website").value) return "silent";                       /* حقل فخ مخفي لا يراه البشر */
+  const now = Date.now(); guard.tries = guard.tries.filter(x => now - x < guard.WINDOW);
+  if (guard.tries.length >= guard.MAX_TRIES) return "many";       /* حد المحاولات */
+  if (now - guard.t0 < guard.MIN_MS || guard.ev < guard.MIN_EV) return "fast";   /* سرعة غير بشرية أو بلا تفاعل */
+  return "";
+}
+const say = m => { $("form-s").textContent = m; };
 const sel = {spec:{items:[]}, cui:{items:[]}};   /* عنصر: {p:رقم} للمُعدّ مسبقًا أو {c:"نص"} مخصص */
 const t = (k, o) => { let s = T[L][k] ?? T.ar[k] ?? ""; if (o) for (const x in o) s = s.replace("{"+x+"}", o[x]); return s; };
 const toLatin = s => s.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
@@ -469,7 +521,7 @@ function applyLang(l) {
   $("top").setAttribute("aria-label", t("top"));
   document.title = L === "ar" ? "انضم إلى طهاة القرماني إكس | AQX CHEFS" : L === "en" ? "Join AQX Chefs | ALQURMANI X" : "Únete a los chefs AQX | ALQURMANI X";
   ["display_name","country","spec","cui","bio","wcc","wn"].forEach(i => err(i,""));
-  fillCountries(); renderStems(); renderTags("spec"); renderTags("cui"); if (!busy) $("send").textContent = t("send"); refresh();
+  fillCountries(); renderStems(); renderTags("spec"); renderTags("cui"); if (busy) $("sendL").textContent = t("sending"); refresh(); renderMarquee();
   startRot();
   try { localStorage.setItem("aqx_lang", L); } catch {}
 }
@@ -518,13 +570,15 @@ function validate() {
 }
 $("form").addEventListener("submit", async ev => {
   ev.preventDefault(); if (busy) return;
+  say(""); if ($("website").value) return;
   const v = validate(); if (!v) return;
-  busy = true;
-  const btn = $("send"); btn.disabled = true; btn.textContent = ""; const sp2 = document.createElement("span"); sp2.className = "spin"; btn.append(sp2, document.createTextNode(" " + t("sending")));
+  const g = guardCheck(); if (g === "silent") return; if (g) return say(t(g));
+  guard.tries.push(Date.now()); busy = true;
+  const btn = $("send"); btn.disabled = true; $("sps").hidden = false; $("sendL").textContent = t("sending");
   const payload = {display_name:v.name, country_code:$("country").value, country_name:$("country").selectedOptions[0].textContent,
     specialties:v.sv, cuisines:v.cv, bio:v.bio, whatsapp_country_code:v.cons ? v.wcc : "", whatsapp_number:v.cons ? v.wn : "", contact_consent:v.cons};
   const r = await post(payload);
-  busy = false; btn.disabled = false; btn.textContent = t("send");
+  busy = false; btn.disabled = false; $("sps").hidden = true; $("sendL").textContent = t("send");
   if (r.kind !== "ok") return simple("warn","uncT","uncD");
   const d = r.data;
   if (d.ok === true) {
@@ -597,6 +651,20 @@ function startRot() {
   clearInterval(rotT); const el = $("rotw"), a = T[L].rot; let i = 0; el.textContent = a[0];
   if (reduced()) return;
   rotT = setInterval(() => { el.classList.add("out"); setTimeout(() => { i = (i + 1) % a.length; el.textContent = a[i]; el.classList.remove("out"); }, 300); }, 2600);
+}
+
+/* ===== شريط المطابخ + مؤثرات ===== */
+function renderMarquee() {
+  const box = $("mt"); box.textContent = ""; const items = T[L].cui.concat(T[L].spec);
+  for (let r = 0; r < 2; r++) items.forEach(n => { const b = document.createElement("span"); b.textContent = n; box.append(b); });
+}
+(function dust() { if (reduced()) return; const box = $("dust"); for (let i = 0; i < 16; i++) { const e = document.createElement("i"); e.style.cssText = "left:" + Math.random()*100 + "%;--s:" + (3 + Math.random()*5) + "px;--d:" + (8 + Math.random()*8) + "s;--dl:" + (-Math.random()*12) + "s"; box.append(e); } })();
+document.querySelectorAll(".feat>div,.jr li,.card,.prev").forEach(e => e.classList.add("spot"));
+addEventListener("pointermove", e => { const el = e.target.closest && e.target.closest(".spot"); if (!el) return; const r = el.getBoundingClientRect(); el.style.setProperty("--mx", (e.clientX - r.left) + "px"); el.style.setProperty("--my", (e.clientY - r.top) + "px"); }, {passive:true});
+const art = document.querySelector(".art");
+if (art && matchMedia("(hover:hover)").matches && !reduced()) {
+  art.addEventListener("pointermove", e => { const r = art.getBoundingClientRect(); art.style.setProperty("--rx", (-((e.clientY - r.top) / r.height - .5) * 10) + "deg"); art.style.setProperty("--ry", (((e.clientX - r.left) / r.width - .5) * 12) + "deg"); });
+  art.addEventListener("pointerleave", () => { art.style.setProperty("--rx", "0deg"); art.style.setProperty("--ry", "0deg"); });
 }
 
 let start = ""; try { start = localStorage.getItem("aqx_lang") || ""; } catch {}
