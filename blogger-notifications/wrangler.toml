@@ -1,0 +1,10 @@
+name = "aqx-blogger-push-bridge"
+main = "cloudflare-blogger-worker.js"
+compatibility_date = "2026-11-22"
+
+# Set these only after the Blogger blog is published on a custom domain
+# that is managed by this Cloudflare zone and proxied through Cloudflare.
+# Replace the placeholders; do not deploy against a *.blogspot.com hostname.
+routes = [
+  { pattern = "BLOG_CUSTOM_DOMAIN/*", zone_name = "CLOUDFLARE_ZONE_NAME" }
+]
