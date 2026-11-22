@@ -36,15 +36,35 @@ window.AQX_BLOGGER_PUSH_CONFIG = {
 
 - `aqx-blogger-push.js`: opt-in client adapter. It fetches the public VAPID key, registers the worker, and registers/unregisters a visitor subscription only after an explicit click.
 - `aqx-blogger-push-sw.js`: service worker source for displaying notifications and handling same-origin navigation.
-- Repository-root `/aqx-blogger-push-sw.js`: root-scope worker copy for a GitHub Pages custom-domain origin. It is present on this preparation branch only; it is not deployed.
+- Repository-root `/aqx-blogger-push-sw.js`: root-scope worker copy for the GitHub Pages custom-domain origin.
+- `github-pages-install-snippet.html`: ready-to-adapt GitHub Pages template using the registered GitHub site key.
+- `blogger-notifications/cloudflare-blogger-worker.js` and `wrangler.toml`: prepared Cloudflare same-origin bridge for a Blogger blog that has first been moved to a Cloudflare-managed custom domain.
+- `blogger-notifications/blogger-custom-domain-install.html`: Blogger snippet for that custom-domain arrangement.
 - `blogger-install-snippet.html`: a separate installation snippet. It contains a placeholder selector for the existing icon; it does not change the icon's markup or SVG.
 - `demo.html`: isolated UI preview. It performs no network requests and sends no notifications.
 
 ## Deployment status and origin constraints
 
-The GitHub Pages path is prepared as a separate branch artifact: when this branch is deployed to the intended GitHub Pages custom-domain origin, the root worker file can be served from that same origin. This has not been deployed or verified over HTTPS.
+**GitHub Pages:** the root worker and a separate install snippet are now present on this preparation branch. They become usable only after the branch is deployed to GitHub Pages at the configured custom domain, the exact worker URL returns JavaScript over HTTPS, and the server registry changes the site's status from pending to active. None of those deployment/activation steps has been performed here.
 
-The `blogspot.com` origin remains blocked: a worker on the GitHub Pages custom domain cannot control a Blogger page on `blogspot.com`. Do not claim Blogger-hosted Push works until a worker is proven reachable from the exact Blogger origin.
+**Blogger:** the actual `https://food-aqx.blogspot.com` origin cannot use a worker hosted on GitHub Pages or another domain. A Cloudflare bridge has been prepared, but it requires the Blogger blog to be published on a custom domain whose DNS is managed/proxied by Cloudflare, with the Worker route attached to that exact custom domain. The current recorded Blogger setup is still `blogspot.com` with no custom domain. The bridge is not deployed, and no DNS or Blogger domain settings have been changed.
+
+## Deployment checklist
+
+### GitHub Pages
+1. Deploy this preparation branch to GitHub Pages (or merge it only after review).
+2. Confirm `https://food-aqx.alqurmanix.com/aqx-blogger-push-sw.js` returns HTTP 200, JavaScript MIME type, and the expected worker body.
+3. Confirm the endpoint returns `site_active: true` for `aqx_food_github`.
+4. Replace the icon selector in `github-pages-install-snippet.html` and add it to the GitHub Pages template.
+
+### Blogger custom domain
+1. Assign a dedicated custom domain to the Blogger blog and point/proxy it through the relevant Cloudflare zone. Do not reuse a hostname that currently serves the GitHub Pages site.
+2. Replace `BLOG_CUSTOM_DOMAIN` and `CLOUDFLARE_ZONE_NAME` in `wrangler.toml`; deploy the Worker route only on that Blogger custom domain.
+3. Confirm `https://BLOG_CUSTOM_DOMAIN/aqx-blogger-push-sw.js` returns HTTP 200, JavaScript MIME type, and `Service-Worker-Allowed: /`.
+4. Confirm the endpoint returns `site_active: true` for `aqx_food_blogger`.
+5. Replace the icon selector in `blogger-custom-domain-install.html` and add the snippet to the Blogger theme.
+
+Do not deploy the Blogger bridge against a `*.blogspot.com` hostname. Do not activate either site's visitor subscription flow while its registry status is pending.
 
 ## Important Blogger hosting blocker — do not install yet
 
@@ -74,3 +94,8 @@ Therefore this package is prepared, but real Push cannot be enabled until a same
 - Unsubscribe uses the same visitor token and endpoint.
 - Notification click URLs are constrained to the Blogger origin.
 - No edits are made to the newsletter or registered-user notification preferences.
+
+
+## Current execution boundary
+
+All additions are on `prep/blogger-notifications` only. The default branch, GitHub Pages settings, Cloudflare, Blogger settings, DNS, Supabase functions, database rows, secrets, and schedules have not been changed. No visitor notifications were sent.
