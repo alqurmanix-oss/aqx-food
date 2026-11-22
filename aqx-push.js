@@ -28,7 +28,8 @@ async function start(){
   if(Notification.permission==="denied")return;
   let sub=await reg.pushManager.getSubscription();
   if(Notification.permission==="granted"&&sub){await post("register",sub.toJSON());localStorage.setItem(ACTIVE_KEY,"1");return;}
-  if(Notification.permission==="default"&&!localStorage.getItem(DISMISS_KEY)){ui();$("aqx-push-ui").style.display="block";}
+  if(!sub&&localStorage.getItem(ACTIVE_KEY)==="1"){localStorage.removeItem(ACTIVE_KEY);localStorage.removeItem(DISMISS_KEY);}
+  if((Notification.permission==="default"||(Notification.permission==="granted"&&!sub))&&!localStorage.getItem(DISMISS_KEY)){ui();$("aqx-push-ui").style.display="block";}
  }catch(e){console.warn("AQX Push unavailable:",e);}
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
