@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>AQX Push — صفحة اختبار</title>
+  <style>
+    body{margin:0;padding:32px 18px;background:#f7f5fc;color:#24143b;font-family:Tahoma,Arial,sans-serif}
+    main{max-width:680px;margin:8vh auto;background:#fff;border:1px solid #e8e0f4;border-radius:20px;padding:28px;box-shadow:0 12px 36px #29134a12}
+    h1{color:#51258c;margin-top:0}p{line-height:1.9}.note{background:#f4effb;padding:14px;border-radius:12px}
+    button{border:0;border-radius:24px;padding:13px 22px;background:#51258c;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+    button:disabled{opacity:.65;cursor:wait}#aqx-test-status{min-height:28px;margin-top:18px;font-weight:700}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>اختبار إشعارات AQX</h1>
+    <p>هذه صفحة اختبار مستقلة للتحقق من ظهور صفحة الإشعارات واتصالها المبدئي بمحرك AQX.</p>
+    <p class="note">لن يتم إرسال إشعار تجريبي أو طلب إذن الإشعارات إلا بعد تفعيل الموقع من محرك AQX وموافقتك الصريحة من المتصفح.</p>
+    <button id="aqx-push-one-paste" type="button">فحص وتفعيل إشعارات AQX</button>
+    <div id="aqx-test-status" role="status" aria-live="polite">الصفحة جاهزة للاختبار.</div>
+  </main>
+<script>
+(() => {
+  "use strict";
+  const ENDPOINT = "https://fkiokwwztbyztleeuwks.supabase.co/functions/v1/aqx-visitor-push";
+  const SITE_KEY = "aqx_food_github";
+  const WORKER = "/aqx-blogger-push-sw.js";
+  const TOKEN_KEY = "aqx_visitor_push_token_v1:" + SITE_KEY;
+  const button = document.getElementById("aqx-push-one-paste");
+  const status = document.getElementById("aqx-test-status");
+
+  if (location.origin !== "https://food-aqx.alqurmanix.com") {
+    button.disabled = true;
+    status.textContent = "هذه الصفحة مهيأة لنطاق AQX Food فقط.";
+    return;
+  }
+
+  function token() {
+    let value = "";
+    try { value = localStorage.getItem(TOKEN_KEY) || ""; } catch (_) {}
+    if (/^[A-Za-z0-9_-]{43,128}$/.test(value)) return value;
+    const bytes = crypto.getRandomValues(new Uint8Array(32));
+    let binary = "";
+    bytes.forEach((b) => binary += String.fromCharCode(b));
+    value = btoa(binary).replace(/\\+/g, "-").replace(/\\//g, "_").replace(/=+$/g, "");
+    try { localStorage.setItem(TOKEN_KEY, value); } catch (_) {}
+    return value;
+  }
+
+  function decodeKey(value) {
+    if (typeof value !== "string" || !/^[A-Za-z0-9_-]+$/.test(value)) throw new Error("مفتاح الإشعارات غير صالح.");
+    const padded = value + "=".repeat((4 - value.length % 4) % 4);
+    const raw = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
+    return Uint8Array.from(raw, c => c.charCodeAt(0));
+  }
+
+  async function request(method, body) {
+    const url = method === "GET" ? ENDPOINT + "?site_key=" + encodeURIComponent(SITE_KEY) : ENDPOINT;
+    const response = await fetch(url, {
+      method, mode: "cors", cache: "no-store",
+      headers: method === "POST" ? { "Content-Type": "application/json" } : {},
+      body: method === "POST" ? JSON.stringify(body) : undefined
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.ok !== true) throw new Error(data.error || "خدمة الإشعارات غير متاحة.");
+    return data;
+  }
+
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      if (!( "serviceWorker" in navigator) || !( "PushManager" in window) || !( "Notification" in window)) {
+        throw new Error("المتصفح لا يدعم إشعارات الويب.");
+      }
+      const info = await request("GET");
+      if (info.site_active !== true) throw new Error("الموقع غير مفعّل للإشعارات في محرك AQX حتى الآن.");
+      if (Notification.permission === "denied") throw new Error("إذن الإشعارات مرفوض من إعدادات المتصفح.");
+      const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
+      if (permission !== "granted") throw new Error("لم تمنح إذن الإشعارات.");
+      const registration = await navigator.serviceWorker.register(WORKER, { scope: "/", updateViaCache: "none" });
+      await navigator.serviceWorker.ready;
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: decodeKey(info.vapid_public_key)
+      });
+      await request("POST", {
+        action: "register", site_key: SITE_KEY, origin: location.origin,
+        visitor_token: token(), push_consent: true, subscription: subscription.toJSON()
+      });
+      status.textContent = "تم تفعيل إشعارات AQX لهذا المتصفح.";
+    } catch (error) {
+      status.textContent = error.message || "تعذر إكمال الاختبار.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
