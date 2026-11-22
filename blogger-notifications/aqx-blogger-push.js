@@ -139,6 +139,7 @@
       await api("POST", {
         action: "register",
         site_key: config.siteKey,
+        origin: location.origin,
         visitor_token: visitorToken(),
         push_consent: true,
         subscription: subscription.toJSON(),
