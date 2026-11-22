@@ -1,0 +1,30 @@
+name: AQX visitor Push package checks
+
+on:
+  push:
+    branches:
+      - prep/blogger-notifications
+  pull_request:
+    paths:
+      - "aqx-blogger-push-sw.js"
+      - "blogger-notifications/**"
+      - "github-pages-install-snippet.html"
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check browser adapter syntax
+        run: node --check blogger-notifications/aqx-blogger-push.js
+      - name: Check service worker syntax
+        run: |
+          node --check aqx-blogger-push-sw.js
+          node --check blogger-notifications/aqx-blogger-push-sw.js
+      - name: Check Cloudflare Worker syntax
+        run: node --check blogger-notifications/cloudflare-blogger-worker.js
+      - name: Verify service worker copies match
+        run: cmp aqx-blogger-push-sw.js blogger-notifications/aqx-blogger-push-sw.js
