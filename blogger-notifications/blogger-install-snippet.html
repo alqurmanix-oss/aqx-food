@@ -1,8 +1,13 @@
-<!-- AQX FOOD Blogger Push: isolated integration snippet.
-     Do not paste into the live Blogger theme until same-origin SW hosting is verified. -->
+<!-- AQX visitor Push: isolated integration snippet.
+     Do not install until the same-origin Service Worker URL and server site registration are verified. -->
 <script>
   window.AQX_BLOGGER_PUSH_CONFIG = {
-    triggerSelector: "#REPLACE_WITH_EXISTING_ICON_SELECTOR"
+    siteKey: "ISSUED_SITE_KEY_FOR_THIS_ORIGIN",
+    endpoint: "https://fkiokwwztbyztleeuwks.supabase.co/functions/v1/aqx-visitor-push",
+    serviceWorkerUrl: "/aqx-blogger-push-sw.js",
+    serviceWorkerScope: "/",
+    triggerSelector: "#REPLACE_WITH_EXISTING_ICON_SELECTOR",
+    panelTitle: "إشعارات AQX"
   };
 </script>
 <script src="/aqx-blogger-push.js" defer></script>
