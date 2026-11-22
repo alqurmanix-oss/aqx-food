@@ -36,8 +36,15 @@ window.AQX_BLOGGER_PUSH_CONFIG = {
 
 - `aqx-blogger-push.js`: opt-in client adapter. It fetches the public VAPID key, registers the worker, and registers/unregisters a visitor subscription only after an explicit click.
 - `aqx-blogger-push-sw.js`: service worker source for displaying notifications and handling same-origin navigation.
+- Repository-root `/aqx-blogger-push-sw.js`: root-scope worker copy for a GitHub Pages custom-domain origin. It is present on this preparation branch only; it is not deployed.
 - `blogger-install-snippet.html`: a separate installation snippet. It contains a placeholder selector for the existing icon; it does not change the icon's markup or SVG.
 - `demo.html`: isolated UI preview. It performs no network requests and sends no notifications.
+
+## Deployment status and origin constraints
+
+The GitHub Pages path is prepared as a separate branch artifact: when this branch is deployed to the intended GitHub Pages custom-domain origin, the root worker file can be served from that same origin. This has not been deployed or verified over HTTPS.
+
+The `blogspot.com` origin remains blocked: a worker on the GitHub Pages custom domain cannot control a Blogger page on `blogspot.com`. Do not claim Blogger-hosted Push works until a worker is proven reachable from the exact Blogger origin.
 
 ## Important Blogger hosting blocker — do not install yet
 
