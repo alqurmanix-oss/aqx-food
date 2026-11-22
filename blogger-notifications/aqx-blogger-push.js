@@ -6,7 +6,8 @@
 
   const defaults = {
     endpoint: "https://fkiokwwztbyztleeuwks.supabase.co/functions/v1/aqx-visitor-push",
-    // Supply a unique registered site key per Blogger/GitHub origin; no fixed site count.\n    siteKey: "",
+    // Supply a unique registered site key per Blogger/GitHub origin; no fixed site count.
+    siteKey: "",
     serviceWorkerUrl: "/aqx-blogger-push-sw.js",
     serviceWorkerScope: "/",
     // Set this to the selector of the already-existing icon. Do not rewrite its markup.
@@ -14,7 +15,10 @@
     panelTitle: "إشعارات AQX FOOD",
   };
 
-  const config = Object.assign({}, defaults, window.AQX_BLOGGER_PUSH_CONFIG || {});\n  if (!config.siteKey || !/^[a-zA-Z0-9_-]{3,120}$/.test(config.siteKey)) {\n    console.error("[AQX Push] Configure the registered siteKey for this origin before enabling.");\n  }
+  const config = Object.assign({}, defaults, window.AQX_BLOGGER_PUSH_CONFIG || {});
+  if (!config.siteKey || !/^[a-zA-Z0-9_-]{3,120}$/.test(config.siteKey)) {
+    console.error("[AQX Push] Configure the registered siteKey for this origin before enabling.");
+  }
   const TOKEN_KEY = "aqx_visitor_push_token_v1:" + (config.siteKey || "unconfigured");
   let panel;
 
@@ -107,7 +111,8 @@
       if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
         throw new Error("هذا المتصفح لا يدعم إشعارات الويب.");
       }
-      if (!config.siteKey) throw new Error("لم يتم إعداد معرّف هذا الموقع في منظومة AQX.");\n      const info = await api("GET");
+      if (!config.siteKey) throw new Error("لم يتم إعداد معرّف هذا الموقع في منظومة AQX.");
+      const info = await api("GET");
       if (info.site_active !== true) {
         throw new Error("خدمة الإشعارات غير مفعّلة لهذا الموقع حتى الآن.");
       }
