@@ -14,7 +14,25 @@ This package is intentionally on branch `prep/blogger-notifications`, not the pr
 - The existing visitor endpoint requires explicit Push consent and stores a hash of a random visitor token. It does not collect visitor email.
 - Visitors receive Push only. Email is not part of this visitor flow.
 
-## Multi-site configuration\n\nThe shared client does not assume one fixed blog or one fixed site key. Configure `window.AQX_BLOGGER_PUSH_CONFIG` separately on each participating origin with that origin's unique `siteKey`, the same central endpoint, and a same-origin Service Worker URL. Visitor tokens are namespaced per site key. New sites are added through the platform/site registry; do not clone or hard-code an origin allowlist into the browser bundle. The existing server registry must authorize each new origin/site key before subscriptions can be accepted.\n\nExample configuration (replace the key with the one issued for that site):\n\n```html\n<script>\nwindow.AQX_BLOGGER_PUSH_CONFIG = {\n  siteKey: "ISSUED_SITE_KEY",\n  endpoint: "https://fkiokwwztbyztleeuwks.supabase.co/functions/v1/aqx-visitor-push",\n  serviceWorkerUrl: "/aqx-blogger-push-sw.js",\n  serviceWorkerScope: "/",\n  triggerSelector: "YOUR_EXISTING_ICON_SELECTOR"\n};\n</script>\n```\n\n## Files
+## Multi-site configuration
+
+The shared client does not assume one fixed blog or one fixed site key. Configure `window.AQX_BLOGGER_PUSH_CONFIG` separately on each participating origin with that origin's unique `siteKey`, the same central endpoint, and a same-origin Service Worker URL. Visitor tokens are namespaced per site key. New sites are added through the platform/site registry; do not clone or hard-code an origin allowlist into the browser bundle. The existing server registry must authorize each new origin/site key before subscriptions can be accepted.
+
+Example configuration (replace the key with the one issued for that site):
+
+```html
+<script>
+window.AQX_BLOGGER_PUSH_CONFIG = {
+  siteKey: "ISSUED_SITE_KEY",
+  endpoint: "https://fkiokwwztbyztleeuwks.supabase.co/functions/v1/aqx-visitor-push",
+  serviceWorkerUrl: "/aqx-blogger-push-sw.js",
+  serviceWorkerScope: "/",
+  triggerSelector: "YOUR_EXISTING_ICON_SELECTOR"
+};
+</script>
+```
+
+## Files
 
 - `aqx-blogger-push.js`: opt-in client adapter. It fetches the public VAPID key, registers the worker, and registers/unregisters a visitor subscription only after an explicit click.
 - `aqx-blogger-push-sw.js`: service worker source for displaying notifications and handling same-origin navigation.
