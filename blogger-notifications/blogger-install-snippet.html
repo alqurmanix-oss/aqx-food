@@ -1,8 +1,9 @@
-<!-- AQX visitor Push: isolated integration snippet.
-     Do not install until the same-origin Service Worker URL and server site registration are verified. -->
+<!-- AQX visitor Push for Blogger custom domain only.
+     Requires the Cloudflare route in wrangler.toml on this exact origin.
+     Do NOT install on food-aqx.blogspot.com. -->
 <script>
   window.AQX_BLOGGER_PUSH_CONFIG = {
-    siteKey: "ISSUED_SITE_KEY_FOR_THIS_ORIGIN",
+    siteKey: "aqx_food_blogger",
     endpoint: "https://fkiokwwztbyztleeuwks.supabase.co/functions/v1/aqx-visitor-push",
     serviceWorkerUrl: "/aqx-blogger-push-sw.js",
     serviceWorkerScope: "/",
@@ -10,4 +11,4 @@
     panelTitle: "إشعارات AQX"
   };
 </script>
-<script src="/blogger-notifications/aqx-blogger-push.js" defer></script>
+<script src="https://food-aqx.alqurmanix.com/blogger-notifications/aqx-blogger-push.js" defer></script>
