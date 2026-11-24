@@ -13,6 +13,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
+from aqx_food_recipe_parser import parse_recipe_html
 
 FEED_BASE = "https://aqxfood.blogspot.com/feeds/posts/default"
 GATEWAY = os.environ.get(
@@ -292,6 +293,34 @@ def main():
                 "inserted": int(result.get("inserted") or 0),
                 "updated": int(result.get("updated") or 0),
                 "processed": int(result.get("processed") or 0),
+            }), flush=True)
+
+        parse_results = []
+        for item in records:
+            if not item["is_recipe_candidate"]:
+                continue
+            parsed = parse_recipe_html(item["raw_content_html"], item["title"], item["source_url"])
+            # Never overwrite a previously useful ingredient parse with an empty extraction.
+            if not parsed["parsed_recipe"]["ingredients"]:
+                print(json.dumps({
+                    "event": "aqx_recipe_parse_skipped",
+                    "external_record_id": item["external_record_id"],
+                    "reason": "no_structured_ingredients_found",
+                }), flush=True)
+                continue
+            parsed["external_record_id"] = item["external_record_id"]
+            parse_results.append(parsed)
+
+        parse_updated = 0
+        for offset in range(0, len(parse_results), 50):
+            result = gateway({"action": "parse", "records": parse_results[offset:offset + 50]}, token)
+            parse_updated += int(result.get("updated") or 0)
+            print(json.dumps({
+                "event": "aqx_recipe_parse_batch_saved",
+                "batch_number": offset // 50 + 1,
+                "records": len(parse_results[offset:offset + 50]),
+                "updated": int(result.get("updated") or 0),
+                "ingredient_candidates": result.get("ingredient_candidates"),
             }), flush=True)
 
         finish = gateway({
