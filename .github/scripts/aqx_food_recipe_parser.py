@@ -3,17 +3,21 @@ import html
 import re
 from html.parser import HTMLParser
 
-VERSION = "aqx-html-structured-v6"
+VERSION = "aqx-html-structured-v7"
 INGREDIENT_LIST_CLASSES = {
     "aqx-ing-list", "aqx-ingredients-list", "aqx-ingredient-list",
 }
 INGREDIENT_NAME_CLASSES = {
     "aqx-ing-name", "aqx-ingredient-name", "aqx-ing-title",
+    "aqx-ing-text", "aqx-ingredient-text",
 }
 INGREDIENT_QUANTITY_CLASSES = {
     "aqx-ing-qty", "aqx-ing-amount", "aqx-ingredient-amount",
 }
-DECORATIVE_CLASSES = {"aqx-check-icon", "aqx-ing-dot", "aqx-step-badge"}
+DECORATIVE_CLASSES = {
+    "aqx-check-icon", "aqx-ing-dot", "aqx-step-badge",
+    "aqx-ing-icon", "aqx-ingredient-icon", "aqx-step-number", "icon",
+}
 METHOD_HEADING_RE = re.compile(
     r"(طريقة\s*(?:التحضير|تحضير|عمل)|خطوات\s*(?:التحضير|العمل)|"
     r"preparation|instructions|method)", re.I
@@ -33,6 +37,8 @@ class RecipeHTMLParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.stack = []
         self.current_li = None
+        self.current_li_tag = None
+        self.current_li_depth = None
         self.current_step_card = None
         self.capture = None
         self.capture_parts = []
@@ -51,8 +57,13 @@ class RecipeHTMLParser(HTMLParser):
         ancestors = set().union(*(entry[1] for entry in self.stack)) if self.stack else set()
         self.stack.append((tag, classes))
 
-        if tag == "li" and ancestors.intersection(INGREDIENT_LIST_CLASSES):
+        if (
+            (tag == "li" and ancestors.intersection(INGREDIENT_LIST_CLASSES))
+            or classes.intersection({"aqx-ingredient-item", "aqx-ing-item"})
+        ):
             self.current_li = {"name": "", "quantity": "", "fallback_parts": []}
+            self.current_li_tag = tag
+            self.current_li_depth = len(self.stack)
 
         if classes.intersection({"aqx-step-card", "aqx-step-item"}):
             self.current_step_card = {"title": "", "text": ""}
@@ -65,7 +76,9 @@ class RecipeHTMLParser(HTMLParser):
             self.capture_depth = len(self.stack)
 
         if self.current_step_card is not None and (
-            tag in {"h4", "p"} or classes.intersection({"aqx-step-title", "aqx-step-text"})
+            tag in {"h4", "p"} or classes.intersection({
+                "aqx-step-title", "aqx-step-text", "aqx-step-content", "aqx-step-desc"
+            })
         ):
             self.capture = (
                 "step_title" if tag == "h4" or "aqx-step-title" in classes else "step_text"
@@ -73,7 +86,11 @@ class RecipeHTMLParser(HTMLParser):
             self.capture_parts = []
             self.capture_depth = len(self.stack)
 
-        if tag == "li" and self.method_context and not ancestors.intersection(INGREDIENT_LIST_CLASSES):
+        if (
+            tag == "li"
+            and (self.method_context or ancestors.intersection({"aqx-steps-list"}))
+            and not ancestors.intersection(INGREDIENT_LIST_CLASSES)
+        ):
             self.method_li = []
             self.method_li_depth = len(self.stack)
 
@@ -124,9 +141,19 @@ class RecipeHTMLParser(HTMLParser):
             self.capture_parts = []
             self.capture_depth = None
 
-        if tag == "li" and self.current_li is not None:
-            name = clean(self.current_li["name"]) or clean(" ".join(self.current_li["fallback_parts"]))
+        if (
+            self.current_li is not None
+            and tag == self.current_li_tag
+            and self.current_li_depth == len(self.stack)
+        ):
+            fallback = clean(" ".join(self.current_li["fallback_parts"]))
+            name = clean(self.current_li["name"])
             quantity = clean(self.current_li["quantity"])
+            if not name and fallback:
+                parts = re.split(r"\s*[:：]\s*|\s+[—–-]\s+", fallback, maxsplit=1)
+                name = clean(parts[0])
+                if len(parts) > 1:
+                    quantity = clean(parts[1])
             if name:
                 self.ingredients.append({
                     "position": len(self.ingredients) + 1,
@@ -139,6 +166,8 @@ class RecipeHTMLParser(HTMLParser):
                     "extraction_method": "aqx_html_structured",
                 })
             self.current_li = None
+            self.current_li_tag = None
+            self.current_li_depth = None
 
         if tag == "li" and self.method_li is not None:
             text = clean(" ".join(self.method_li))
@@ -180,10 +209,22 @@ def parse_recipe_html(raw_html, title, source_url):
     if not steps:
         validation.append("preparation_steps_not_extracted_from_structured_markup")
 
-    clean_steps = [
-        {"position": i + 1, "title": step.get("title") or None, "text": step["text"]}
-        for i, step in enumerate(steps) if step.get("text")
-    ]
+    clean_steps = []
+    for step in steps:
+        step_text = clean(step.get("text"))
+        step_title = clean(step.get("title"))
+        if not step_text:
+            continue
+        if not step_title and ":" in step_text:
+            possible_title, remainder = step_text.split(":", 1)
+            if 2 <= len(possible_title.strip()) <= 60 and remainder.strip():
+                step_title = clean(possible_title)
+                step_text = clean(remainder)
+        clean_steps.append({
+            "position": len(clean_steps) + 1,
+            "title": step_title or None,
+            "text": step_text,
+        })
     return {
         "external_record_id": None,
         "parsed_recipe": {
