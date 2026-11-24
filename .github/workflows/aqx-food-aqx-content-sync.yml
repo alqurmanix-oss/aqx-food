@@ -1,6 +1,13 @@
 name: AQX Food AQX-authored content sync
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/scripts/aqx_food_content_sync.py"
+      - ".github/scripts/aqx_food_recipe_parser.py"
+      - ".github/scripts/test_aqx_food_recipe_parser.py"
+      - ".github/workflows/aqx-food-aqx-content-sync.yml"
   schedule:
     - cron: "5 3 * * *"
   workflow_dispatch:
