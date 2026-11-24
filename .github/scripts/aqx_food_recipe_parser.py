@@ -200,14 +200,14 @@ class RecipeHTMLParser(HTMLParser):
 def normalize_html_source(raw_html):
     value = raw_html or ""
     # A few older AQX snapshots were stored as JSON-escaped HTML rather than decoded HTML.
-    if r'\\"' in value:
-        value = value.replace(r'\\"', '"')
-    if r'\\n' in value:
-        value = value.replace(r'\\n', "\\n")
-    if r'\\r' in value:
-        value = value.replace(r'\\r', "\\r")
-    if r'\\t' in value:
-        value = value.replace(r'\\t', "\\t")
+    if r'\"' in value:
+        value = value.replace(r'\"', '"')
+    if r'\n' in value:
+        value = value.replace(r'\n', "\\n")
+    if r'\r' in value:
+        value = value.replace(r'\r', "\\r")
+    if r'\t' in value:
+        value = value.replace(r'\t', "\\t")
     return value
 
 
