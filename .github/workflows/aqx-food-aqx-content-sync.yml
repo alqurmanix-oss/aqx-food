@@ -27,7 +27,7 @@ jobs:
           python-version: "3.12"
 
       - name: Validate sync script syntax
-        run: python -m py_compile .github/scripts/aqx_food_content_sync.py .github/scripts/aqx_food_recipe_parser.py
+        run: python -m py_compile .github/scripts/aqx_food_content_sync.py .github/scripts/aqx_food_recipe_parser.py .github/scripts/test_aqx_food_recipe_parser.py\n          python -m unittest discover -s .github/scripts -p 'test_*.py' -v
 
       - name: Sync AQX Blogger source into private staging
         env:
