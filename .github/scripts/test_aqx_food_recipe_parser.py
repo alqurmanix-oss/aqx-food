@@ -60,6 +60,24 @@ class RecipeParserTests(unittest.TestCase):
         self.assertIn("حمّصي التوابل", recipe["preparation_steps"][0]["text"])
         self.assertEqual(len(recipe["ingredients"]), 1)
 
+
+    def test_extracts_method_steps_from_aqx_div_headings(self):
+        source_html = """
+        <div class="aqx-h2"><div class="aqx-h2-icon">🍳</div>
+          <span>طريقة التحضير</span></div>
+        <div class="aqx-h3">خطوة تجهيز التوابل والتتبيل</div>
+        <ul><li>حمّصي التوابل في مقلاة جافة.</li>
+            <li>أضيفي السمك وقلّبي برفق.</li></ul>
+        <div class="aqx-h2"><span>مقادير الوصفة</span></div>
+        <ul class="aqx-ing-list"><li><span class="aqx-ing-name">سمك فيليه</span>
+          <span class="aqx-ing-amount">500 غرام</span></li></ul>
+        """
+        result = parse_recipe_html(source_html, "برياني سمك", "https://aqxfood.blogspot.com/test")
+        recipe = result["parsed_recipe"]
+        self.assertEqual(len(recipe["preparation_steps"]), 2)
+        self.assertEqual(len(recipe["ingredients"]), 1)
+        self.assertIn("حمّصي التوابل", recipe["preparation_steps"][0]["text"])
+
     def test_does_not_invent_missing_steps(self):
         result = parse_recipe_html(
             '<ul class="aqx-ing-list"><li><span class="aqx-ing-name">ملح</span></li></ul>',
