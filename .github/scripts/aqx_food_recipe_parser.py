@@ -3,7 +3,7 @@ import html
 import re
 from html.parser import HTMLParser
 
-VERSION = "aqx-html-structured-v7"
+VERSION = "aqx-html-structured-v8"
 INGREDIENT_LIST_CLASSES = {
     "aqx-ing-list", "aqx-ingredients-list", "aqx-ingredient-list",
 }
@@ -197,9 +197,23 @@ class RecipeHTMLParser(HTMLParser):
             self.stack.pop()
 
 
+def normalize_html_source(raw_html):
+    value = raw_html or ""
+    # A few older AQX snapshots were stored as JSON-escaped HTML rather than decoded HTML.
+    if r'\\"' in value:
+        value = value.replace(r'\\"', '"')
+    if r'\\n' in value:
+        value = value.replace(r'\\n', "\\n")
+    if r'\\r' in value:
+        value = value.replace(r'\\r', "\\r")
+    if r'\\t' in value:
+        value = value.replace(r'\\t', "\\t")
+    return value
+
+
 def parse_recipe_html(raw_html, title, source_url):
     parser = RecipeHTMLParser()
-    parser.feed(raw_html or "")
+    parser.feed(normalize_html_source(raw_html))
     ingredients = parser.ingredients
     steps = parser.steps
 
