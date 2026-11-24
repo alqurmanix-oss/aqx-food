@@ -140,6 +140,23 @@ class RecipeParserTests(unittest.TestCase):
         self.assertEqual(recipe["preparation_step_count"], 1)
         self.assertIn("اخلطي الدقيق", recipe["preparation_steps"][0]["text"])
 
+
+    def test_extracts_instruction_paragraphs_under_method_heading(self):
+        source_html = """
+        <h2>طريقة تحضير العجينة الأساسية خطوة بخطوة</h2>
+        <div><h3>اختبار تفاعل الخميرة</h3>
+          <p>ضعي الماء الدافئ في وعاء عميق، ثم أضيفي الخميرة والسكر وقلّبي جيداً.</p>
+        </div>
+        <div><h3>مرحلة العجن</h3>
+          <p>اعجني العجينة لمدة عشر دقائق حتى تحصلي على قوام ناعم ومرن.</p>
+        </div>
+        """
+        result = parse_recipe_html(source_html, "عجينة أساسية", "https://aqxfood.blogspot.com/test")
+        steps = result["parsed_recipe"]["preparation_steps"]
+        self.assertEqual(len(steps), 2)
+        self.assertEqual(steps[0]["title"], "اختبار تفاعل الخميرة")
+        self.assertIn("أضيفي الخميرة", steps[0]["text"])
+
     def test_does_not_invent_missing_steps(self):
         result = parse_recipe_html(
             '<ul class="aqx-ing-list"><li><span class="aqx-ing-name">ملح</span></li></ul>',
