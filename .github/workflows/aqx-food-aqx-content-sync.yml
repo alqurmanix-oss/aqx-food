@@ -15,6 +15,7 @@ on:
 permissions:
   contents: read
   id-token: write
+  issues: write
 
 concurrency:
   group: aqx-food-content-sync
@@ -55,3 +56,17 @@ jobs:
           done
           echo "AQX content sync failed after 3 attempts."
           exit 1
+
+      - name: Create or update failure alert
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          issue_number=$(gh issue list --state open --search "AQX Food content sync failure in:title" --json number --jq '.[0].number // empty')
+          body="AQX Food automatic content pipeline failed.\n\nRun: ${RUN_URL}\nCommit: ${GITHUB_SHA}\n\nThe pipeline will retry automatically on its next scheduled run. Investigate this run before closing the alert."
+          if [ -n "$issue_number" ]; then
+            gh issue comment "$issue_number" --body "$body"
+          else
+            gh issue create --title "AQX Food content sync failure" --body "$body" --label "bug"
+          fi
