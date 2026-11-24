@@ -79,7 +79,9 @@ def inspect_dataset(code, item, temp_dir):
         duplicate_ids = 0
 
         with archive.open(member) as stream:
-            for record in ijson.items(stream, prefix):
+            # use_float avoids Decimal objects that json.dumps cannot serialize.
+            # It is used only for this read-only size estimate, not for ingestion.
+            for record in ijson.items(stream, prefix, use_float=True):
                 if not isinstance(record, dict):
                     raise RuntimeError(f"{code}: encountered a non-object food record")
                 record_count += 1
