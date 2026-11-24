@@ -39,6 +39,7 @@ jobs:
         run: python -m py_compile .github/scripts/usda_guarded_full_import.py
 
       - name: Run guarded USDA release import with bounded retries
+        id: usda-import
         env:
           AQX_FOOD_FULL_IMPORT_URL: https://vuszqzgldbsscuxdfhdz.supabase.co/functions/v1/aqx-food-github-full-import
         run: |
@@ -55,6 +56,33 @@ jobs:
           done
           echo "USDA release import failed after 3 attempts."
           exit 1
+
+      - name: Create or update critical source quality alert
+        if: ${{ steps['usda-import'].outputs.critical_issues != '' && steps['usda-import'].outputs.critical_issues != '0' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CRITICAL_ISSUES: ${{ steps['usda-import'].outputs.critical_issues }}
+          WARNING_ISSUES: ${{ steps['usda-import'].outputs.warning_issues }}
+        run: |
+          issue_number=$(gh issue list --state open --search "AQX Food critical source data quality findings in:title" --json number --jq '.[0].number // empty')
+          body="AQX Food source-data QA found ${CRITICAL_ISSUES} critical and ${WARNING_ISSUES} warning issues.\n\nRun: ${RUN_URL}\n\nAffected source rows remain in private staging. No nutrition values were corrected, deleted, or promoted to live records automatically."
+          if [ -n "$issue_number" ]; then
+            gh issue comment "$issue_number" --body "$body"
+          else
+            gh issue create --title "AQX Food critical source data quality findings" --body "$body"
+          fi
+
+      - name: Close resolved source quality alert
+        if: ${{ success() && steps['usda-import'].outputs.critical_issues == '0' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          issue_number=$(gh issue list --state open --search "AQX Food critical source data quality findings in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$issue_number" ]; then
+            gh issue comment "$issue_number" --body "AQX Food source-data QA reports zero critical issues in run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}. The quality alert is resolved."
+            gh issue close "$issue_number"
+          fi
 
       - name: Create or update USDA import failure alert
         if: failure()
