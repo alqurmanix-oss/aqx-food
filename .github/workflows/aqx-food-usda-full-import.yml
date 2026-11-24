@@ -66,7 +66,7 @@ jobs:
           WARNING_ISSUES: ${{ steps['usda-import'].outputs.warning_issues }}
         run: |
           issue_number=$(gh issue list --state open --search "AQX Food critical source data quality findings in:title" --json number --jq '.[0].number // empty')
-          body="AQX Food source-data QA found ${CRITICAL_ISSUES} critical and ${WARNING_ISSUES} warning issues.\n\nRun: ${RUN_URL}\n\nAffected source rows remain in private staging. No nutrition values were corrected, deleted, or promoted to live records automatically."
+          body=$(printf 'AQX Food source-data QA found %s critical and %s warning issues.\n\nRun: %s\n\nAffected source rows remain in private staging. No nutrition values were corrected, deleted, or promoted to live records automatically.' "$CRITICAL_ISSUES" "$WARNING_ISSUES" "$RUN_URL")
           if [ -n "$issue_number" ]; then
             gh issue edit "$issue_number" --body "$body"
             gh issue comment "$issue_number" --body "Automated source quality audit refreshed the findings."
