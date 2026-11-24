@@ -329,7 +329,7 @@ def main():
             "inserted_suggestions": int(match_result.get("inserted_suggestions") or 0),
             "accepted_matches": int(match_result.get("accepted_matches") or 0),
             "auto_approval": bool(match_result.get("auto_approval")),
-        }), ensure_ascii=False, flush=True)
+        }, ensure_ascii=False), flush=True)
 
         finish = gateway({
             "action": "finish",
