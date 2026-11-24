@@ -329,6 +329,9 @@ def main():
             "inserted_suggestions": int(match_result.get("inserted_suggestions") or 0),
             "accepted_matches": int(match_result.get("accepted_matches") or 0),
             "auto_approval": bool(match_result.get("auto_approval")),
+            "auto_acceptance_policy": match_result.get("auto_acceptance_policy"),
+            "all_nutrition_records_unverified": bool(match_result.get("all_nutrition_records_unverified")),
+            "live_records_published": int(match_result.get("live_records_published") or 0),
             "parse_merge_policy": "preserve_existing_ingredients_and_steps",
         }, ensure_ascii=False), flush=True)
 
