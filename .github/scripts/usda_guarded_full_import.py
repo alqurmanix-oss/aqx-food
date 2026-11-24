@@ -167,8 +167,8 @@ def main():
     output_path = os.environ.get("GITHUB_OUTPUT")
     if output_path:
         with open(output_path, "a", encoding="utf-8") as output:
-            output.write(f"critical_issues={critical_issues}\\n")
-            output.write(f"warning_issues={warning_issues}\\n")
+            output.write(f"critical_issues={critical_issues}" + chr(10))
+            output.write(f"warning_issues={warning_issues}" + chr(10))
     print(json.dumps({
         "event": "aqx_source_quality_audit_completed",
         "records_scanned": int(qa.get("records_scanned") or 0),
