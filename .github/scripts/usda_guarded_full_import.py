@@ -161,6 +161,22 @@ def main():
             gateway("finish", dataset_code=result["dataset"], dataset_version=result["version"], status="imported")
             result["status"] = "imported"
 
+    qa = gateway("qa")
+    critical_issues = int(qa.get("critical_issues") or 0)
+    warning_issues = int(qa.get("warning_issues") or 0)
+    output_path = os.environ.get("GITHUB_OUTPUT")
+    if output_path:
+        with open(output_path, "a", encoding="utf-8") as output:
+            output.write(f"critical_issues={critical_issues}\\n")
+            output.write(f"warning_issues={warning_issues}\\n")
+    print(json.dumps({
+        "event": "aqx_source_quality_audit_completed",
+        "records_scanned": int(qa.get("records_scanned") or 0),
+        "critical_issues": critical_issues,
+        "warning_issues": warning_issues,
+        "live_records_modified": int(qa.get("live_records_modified") or 0),
+    }, ensure_ascii=False), flush=True)
+
     print(json.dumps({
         "mode": "GUARDED_FULL_USDA_IMPORT",
         "results": results,
