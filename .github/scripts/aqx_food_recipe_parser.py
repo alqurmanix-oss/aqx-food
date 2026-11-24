@@ -3,7 +3,7 @@ import html
 import re
 from html.parser import HTMLParser
 
-VERSION = "aqx-html-structured-v5"
+VERSION = "aqx-html-structured-v6"
 INGREDIENT_LIST_CLASSES = {
     "aqx-ing-list", "aqx-ingredients-list", "aqx-ingredient-list",
 }
@@ -54,7 +54,7 @@ class RecipeHTMLParser(HTMLParser):
         if tag == "li" and ancestors.intersection(INGREDIENT_LIST_CLASSES):
             self.current_li = {"name": "", "quantity": "", "fallback_parts": []}
 
-        if "aqx-step-card" in classes:
+        if classes.intersection({"aqx-step-card", "aqx-step-item"}):
             self.current_step_card = {"title": "", "text": ""}
 
         if self.current_li is not None and classes.intersection(
@@ -64,8 +64,12 @@ class RecipeHTMLParser(HTMLParser):
             self.capture_parts = []
             self.capture_depth = len(self.stack)
 
-        if self.current_step_card is not None and tag in {"h4", "p"}:
-            self.capture = "step_title" if tag == "h4" else "step_text"
+        if self.current_step_card is not None and (
+            tag in {"h4", "p"} or classes.intersection({"aqx-step-title", "aqx-step-text"})
+        ):
+            self.capture = (
+                "step_title" if tag == "h4" or "aqx-step-title" in classes else "step_text"
+            )
             self.capture_parts = []
             self.capture_depth = len(self.stack)
 
@@ -148,11 +152,11 @@ class RecipeHTMLParser(HTMLParser):
             self.method_li_depth = None
 
         if tag == "div" and self.current_step_card is not None:
-            if self.stack and "aqx-step-card" in self.stack[-1][1]:
+            if self.stack and self.stack[-1][1].intersection({"aqx-step-card", "aqx-step-item"}):
                 if self.current_step_card.get("text"):
                     self.steps.append({
                         **self.current_step_card,
-                        "extraction_method": "aqx_step_card",
+                        "extraction_method": "aqx_step_card" if "aqx-step-card" in self.stack[-1][1] else "aqx_step_item",
                     })
                 self.current_step_card = None
 
