@@ -41,6 +41,25 @@ class RecipeParserTests(unittest.TestCase):
         self.assertIn("صدور دجاج", ingredients[0]["raw_name"])
         self.assertNotIn("✓", ingredients[0]["raw_name"])
 
+    def test_extracts_legacy_method_section_list_steps(self):
+        source_html = """
+        <h2>طريقة التحضير</h2>
+        <div><h3>تجهيز التوابل والتتبيل</h3>
+          <ul>
+            <li>حمّصي التوابل في مقلاة جافة.</li>
+            <li>أضيفي السمك والزبادي وقلّبي برفق.</li>
+          </ul>
+        </div>
+        <h2>المقادير</h2>
+        <ul class="aqx-ing-list"><li><span class="aqx-ing-name">سمك فيليه</span>
+          <span class="aqx-ing-amount">500 غرام</span></li></ul>
+        """
+        result = parse_recipe_html(source_html, "برياني سمك", "https://aqxfood.blogspot.com/test")
+        recipe = result["parsed_recipe"]
+        self.assertEqual(len(recipe["preparation_steps"]), 2)
+        self.assertIn("حمّصي التوابل", recipe["preparation_steps"][0]["text"])
+        self.assertEqual(len(recipe["ingredients"]), 1)
+
     def test_does_not_invent_missing_steps(self):
         result = parse_recipe_html(
             '<ul class="aqx-ing-list"><li><span class="aqx-ing-name">ملح</span></li></ul>',
