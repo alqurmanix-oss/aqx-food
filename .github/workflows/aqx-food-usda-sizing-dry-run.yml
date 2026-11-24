@@ -26,5 +26,5 @@ jobs:
         run: python -m pip install --disable-pip-version-check requests ijson
       - name: Count USDA records and measure serialized payload (read-only)
         env:
-          AQX_FOOD_INGEST_URL: https://vuszqzgldbsscuxdfhdz.supabase.co/functions/v1/aqx-food-github-ingest
+          AQX_FOOD_INGEST_URL: https://vuszqzgldbsscuxdfhdz.supabase.co/functions/v1/aqx-food-github-sizing
         run: python .github/scripts/usda_archive_sizing_dry_run.py
