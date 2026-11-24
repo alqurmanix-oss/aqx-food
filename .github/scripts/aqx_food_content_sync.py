@@ -300,7 +300,7 @@ def main():
         print(json.dumps({
             "event": "aqx_pending_recipe_parse_queue",
             "pending_records": int(pending.get("count") or len(pending_records)),
-            "parser_version": "aqx-html-structured-v8",
+            "parser_version": "aqx-html-structured-v9",
         }), flush=True)
 
         parse_results = []
