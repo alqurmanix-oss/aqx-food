@@ -3,7 +3,7 @@ import html
 import re
 from html.parser import HTMLParser
 
-VERSION = "aqx-html-structured-v4"
+VERSION = "aqx-html-structured-v5"
 INGREDIENT_LIST_CLASSES = {
     "aqx-ing-list", "aqx-ingredients-list", "aqx-ingredient-list",
 }
@@ -73,8 +73,8 @@ class RecipeHTMLParser(HTMLParser):
             self.method_li = []
             self.method_li_depth = len(self.stack)
 
-        if tag in {"h2", "h3", "h4"}:
-            self.heading = {"text": [], "tag": tag}
+        if tag in {"h2", "h3", "h4"} or classes.intersection({"aqx-h2", "aqx-h3"}):
+            self.heading = {"text": [], "tag": tag, "depth": len(self.stack)}
 
     def handle_data(self, data):
         if self.current_li is not None:
@@ -97,7 +97,7 @@ class RecipeHTMLParser(HTMLParser):
         label = clean(" ".join(self.heading["text"])) if self.heading else ""
         if not label:
             return
-        if METHOD_HEADING_RE.search(label):
+        if METHOD_HEADING_RE.search(label) or re.search(r"^(?:الخطوة|خطوة)\\s", label):
             self.method_context = True
             self.pending_step_title = label
         elif INGREDIENT_HEADING_RE.search(label) or NON_METHOD_HEADING_RE.search(label):
@@ -156,7 +156,7 @@ class RecipeHTMLParser(HTMLParser):
                     })
                 self.current_step_card = None
 
-        if tag in {"h2", "h3", "h4"} and self.heading is not None:
+        if self.heading is not None and self.heading.get("depth") == len(self.stack):
             self._finish_heading()
             self.heading = None
 
