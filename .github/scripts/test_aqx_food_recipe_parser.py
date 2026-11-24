@@ -78,6 +78,28 @@ class RecipeParserTests(unittest.TestCase):
         self.assertEqual(len(recipe["ingredients"]), 1)
         self.assertIn("حمّصي التوابل", recipe["preparation_steps"][0]["text"])
 
+
+    def test_extracts_aqx_step_item_title_and_text(self):
+        source_html = """
+        <h2 class="aqx-h2">طريقة تحضير الوصفة</h2>
+        <div class="aqx-steps-container">
+          <div class="aqx-step-item">
+            <div class="aqx-step-badge">1</div>
+            <div class="aqx-step-title"><span>إذابة الزبدة</span></div>
+            <p class="aqx-step-text">ذوّبي الزبدة في مقلاة على نار متوسطة.</p>
+          </div>
+          <div class="aqx-step-item">
+            <div class="aqx-step-title">إضافة البصل</div>
+            <p class="aqx-step-text">أضيفي البصل وقلّبي جيداً.</p>
+          </div>
+        </div>
+        """
+        result = parse_recipe_html(source_html, "تغميسة البصل", "https://aqxfood.blogspot.com/test")
+        steps = result["parsed_recipe"]["preparation_steps"]
+        self.assertEqual(len(steps), 2)
+        self.assertEqual(steps[0]["title"], "إذابة الزبدة")
+        self.assertIn("ذوّبي الزبدة", steps[0]["text"])
+
     def test_does_not_invent_missing_steps(self):
         result = parse_recipe_html(
             '<ul class="aqx-ing-list"><li><span class="aqx-ing-name">ملح</span></li></ul>',
