@@ -68,5 +68,5 @@ jobs:
           if [ -n "$issue_number" ]; then
             gh issue comment "$issue_number" --body "$body"
           else
-            gh issue create --title "AQX Food content sync failure" --body "$body" --label "bug"
+            gh issue create --title "AQX Food content sync failure" --body "$body"
           fi
