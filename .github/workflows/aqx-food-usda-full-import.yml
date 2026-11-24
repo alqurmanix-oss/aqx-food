@@ -68,6 +68,7 @@ jobs:
             gh issue comment "$issue_number" --body "$body"
           else
             gh issue create --title "AQX Food USDA import failure" --body "$body"
+          fi
 
       - name: Close resolved USDA import failure alert
         if: success()
@@ -78,5 +79,4 @@ jobs:
           if [ -n "$issue_number" ]; then
             gh issue comment "$issue_number" --body "AQX Food USDA import recovered successfully in run ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
             gh issue close "$issue_number"
-          fi
           fi
