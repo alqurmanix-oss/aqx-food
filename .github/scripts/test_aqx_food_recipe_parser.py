@@ -130,6 +130,26 @@ class RecipeParserTests(unittest.TestCase):
         self.assertEqual(recipe["preparation_steps"][0]["title"], "خلط المكونات")
         self.assertIn("اخلطي المكونات", recipe["preparation_steps"][0]["text"])
 
+
+    def test_decodes_json_escaped_legacy_html(self):
+        source_html = r"""
+        <div class=\\"aqx-ingredient-item\\">
+          <span class=\\"aqx-ing-icon\\">🍚</span>
+          <span>دقيق: كوبان</span>
+        </div>
+        <div class=\\"aqx-step-card\\">
+          <div class=\\"aqx-step-content\\">
+            <strong>خلط المكونات:</strong> اخلطي الدقيق بالماء جيداً.
+          </div>
+        </div>
+        """
+        result = parse_recipe_html(source_html, "عجينة القطايف", "https://aqxfood.blogspot.com/test")
+        recipe = result["parsed_recipe"]
+        self.assertEqual(recipe["ingredient_count"], 1)
+        self.assertEqual(recipe["ingredients"][0]["raw_name"], "دقيق")
+        self.assertEqual(recipe["preparation_step_count"], 1)
+        self.assertIn("اخلطي الدقيق", recipe["preparation_steps"][0]["text"])
+
     def test_does_not_invent_missing_steps(self):
         result = parse_recipe_html(
             '<ul class="aqx-ing-list"><li><span class="aqx-ing-name">ملح</span></li></ul>',
