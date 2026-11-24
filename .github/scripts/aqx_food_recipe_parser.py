@@ -3,7 +3,7 @@ import html
 import re
 from html.parser import HTMLParser
 
-VERSION = "aqx-html-structured-v8"
+VERSION = "aqx-html-structured-v9"
 INGREDIENT_LIST_CLASSES = {
     "aqx-ing-list", "aqx-ingredients-list", "aqx-ingredient-list",
 }
@@ -94,6 +94,11 @@ class RecipeHTMLParser(HTMLParser):
             self.method_li = []
             self.method_li_depth = len(self.stack)
 
+        if tag == "p" and self.method_context and self.current_step_card is None and self.current_li is None and self.method_li is None:
+            self.capture = "method_paragraph"
+            self.capture_parts = []
+            self.capture_depth = len(self.stack)
+
         if tag in {"h2", "h3", "h4"} or classes.intersection({"aqx-h2", "aqx-h3"}):
             self.heading = {"text": [], "tag": tag, "depth": len(self.stack)}
 
@@ -118,7 +123,10 @@ class RecipeHTMLParser(HTMLParser):
         label = clean(" ".join(self.heading["text"])) if self.heading else ""
         if not label:
             return
-        if METHOD_HEADING_RE.search(label) or re.search(r"^(?:الخطوة|خطوة)\\s", label):
+        if METHOD_HEADING_RE.search(label):
+            self.method_context = True
+            self.pending_step_title = ""
+        elif re.search(r"^(?:الخطوة|خطوة)\\s", label):
             self.method_context = True
             self.pending_step_title = label
         elif INGREDIENT_HEADING_RE.search(label) or NON_METHOD_HEADING_RE.search(label):
@@ -137,6 +145,13 @@ class RecipeHTMLParser(HTMLParser):
                 key = "title" if self.capture == "step_title" else "text"
                 if value:
                     self.current_step_card[key] = value
+            elif self.capture == "method_paragraph" and len(value) >= 20 and looks_like_instruction(value):
+                self.steps.append({
+                    "title": self.pending_step_title,
+                    "text": value,
+                    "extraction_method": "aqx_method_section_paragraph",
+                })
+                self.pending_step_title = ""
             self.capture = None
             self.capture_parts = []
             self.capture_depth = None
@@ -196,6 +211,16 @@ class RecipeHTMLParser(HTMLParser):
         if self.stack:
             self.stack.pop()
 
+
+
+def looks_like_instruction(value):
+    return bool(re.search(
+        r"(أضيف|اضيف|ضع|ضعي|ضعى|قلّب|قلب|اخلط|امزج|اخفق|اعجن|سخن|اسكب|اترك|اطه|اطهي|"
+        r"قشر|اهر|افرد|اخبز|وزع|صب|أخرج|ارفع|حمّص|تبل|أذب|أغلق|غط|قسّم|ادخل|اشو|اسلق|اقل|"
+        r"تُضاف|يُضاف|يُخلط|يُطهى|تُترك|يُترك|تُوضع|يُوضع|ثم|mix|add|stir|cook|bake|heat|pour|combine|place|leave|remove|serve)",
+        value,
+        re.I,
+    ))
 
 def normalize_html_source(raw_html):
     value = raw_html or ""
