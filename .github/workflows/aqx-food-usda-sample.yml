@@ -1,4 +1,4 @@
-name: AQX Food USDA bounded storage sizing sample # automatic bounded measurement
+name: AQX Food USDA bounded storage sizing sample # automatic bounded measurement v2
 
 on:
   workflow_dispatch:
