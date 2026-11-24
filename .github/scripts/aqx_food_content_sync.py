@@ -300,12 +300,13 @@ def main():
             if not item["is_recipe_candidate"]:
                 continue
             parsed = parse_recipe_html(item["raw_content_html"], item["title"], item["source_url"])
-            # Never overwrite a previously useful ingredient parse with an empty extraction.
-            if not parsed["parsed_recipe"]["ingredients"]:
+            # Keep useful old fields; the DB merge preserves ingredients or steps
+            # whenever this parser cannot extract that section from a legacy template.
+            if not parsed["parsed_recipe"]["ingredients"] and not parsed["parsed_recipe"]["preparation_steps"]:
                 print(json.dumps({
                     "event": "aqx_recipe_parse_skipped",
                     "external_record_id": item["external_record_id"],
-                    "reason": "no_structured_ingredients_found",
+                    "reason": "no_structured_ingredients_or_steps_found",
                 }), flush=True)
                 continue
             parsed["external_record_id"] = item["external_record_id"]
