@@ -295,20 +295,19 @@ def main():
                 "processed": int(result.get("processed") or 0),
             }), flush=True)
 
+        pending = gateway({"action": "pending"}, token)
+        pending_records = pending.get("records", [])
+        print(json.dumps({
+            "event": "aqx_pending_recipe_parse_queue",
+            "pending_records": int(pending.get("count") or len(pending_records)),
+            "parser_version": "aqx-html-structured-v8",
+        }), flush=True)
+
         parse_results = []
-        for item in records:
-            if not item["is_recipe_candidate"]:
-                continue
+        for item in pending_records:
             parsed = parse_recipe_html(item["raw_content_html"], item["title"], item["source_url"])
-            # Keep useful old fields; the DB merge preserves ingredients or steps
-            # whenever this parser cannot extract that section from a legacy template.
-            if not parsed["parsed_recipe"]["ingredients"] and not parsed["parsed_recipe"]["preparation_steps"]:
-                print(json.dumps({
-                    "event": "aqx_recipe_parse_skipped",
-                    "external_record_id": item["external_record_id"],
-                    "reason": "no_structured_ingredients_or_steps_found",
-                }), flush=True)
-                continue
+            # Always persist the parser attempt. The DB merge keeps older useful
+            # ingredients/steps whenever this version cannot extract that section.
             parsed["external_record_id"] = item["external_record_id"]
             parse_results.append(parsed)
 
