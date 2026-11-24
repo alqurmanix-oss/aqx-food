@@ -18,6 +18,7 @@ class RecipeHTMLParser(HTMLParser):
         self.current_step = None
         self.capture = None
         self.capture_parts = []
+        self.capture_depth = None
         self.ingredients = []
         self.steps = []
         self.heading = None
@@ -35,9 +36,11 @@ class RecipeHTMLParser(HTMLParser):
         if self.current_li is not None and classes.intersection({"aqx-ing-name", "aqx-ing-qty"}):
             self.capture = "name" if "aqx-ing-name" in classes else "quantity"
             self.capture_parts = []
+            self.capture_depth = len(self.stack)
         if self.current_step is not None and tag in {"h4", "p"}:
             self.capture = "step_title" if tag == "h4" else "step_text"
             self.capture_parts = []
+            self.capture_depth = len(self.stack)
         if tag in {"h2", "h3"}:
             self.heading = {"text": [], "tag": tag}
 
@@ -48,19 +51,21 @@ class RecipeHTMLParser(HTMLParser):
             self.heading["text"].append(data)
 
     def handle_endtag(self, tag):
-        if self.capture and tag in {"span", "h4", "p"}:
+        if self.capture and self.capture_depth == len(self.stack):
             value = clean(" ".join(self.capture_parts))
             if self.current_li is not None and self.capture in {"name", "quantity"}:
                 if value:
                     self.current_li[self.capture] = clean(self.current_li[self.capture] + " " + value)
                 self.capture = None
                 self.capture_parts = []
+                self.capture_depth = None
             elif self.current_step is not None and self.capture in {"step_title", "step_text"}:
                 key = "title" if self.capture == "step_title" else "text"
                 if value:
                     self.current_step[key] = value
                 self.capture = None
                 self.capture_parts = []
+                self.capture_depth = None
         if tag == "li" and self.current_li is not None:
             name = clean(self.current_li["name"])
             quantity = clean(self.current_li["quantity"])
