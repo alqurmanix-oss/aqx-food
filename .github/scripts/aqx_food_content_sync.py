@@ -323,6 +323,14 @@ def main():
                 "ingredient_candidates": result.get("ingredient_candidates"),
             }), flush=True)
 
+        match_result = gateway({"action": "match"}, token)
+        print(json.dumps({
+            "event": "aqx_ingredient_exact_match_suggestions_generated",
+            "inserted_suggestions": int(match_result.get("inserted_suggestions") or 0),
+            "accepted_matches": int(match_result.get("accepted_matches") or 0),
+            "auto_approval": bool(match_result.get("auto_approval")),
+        }), ensure_ascii=False, flush=True)
+
         finish = gateway({
             "action": "finish",
             "dataset_version": version,
