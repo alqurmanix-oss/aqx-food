@@ -132,17 +132,7 @@ class RecipeParserTests(unittest.TestCase):
 
 
     def test_decodes_json_escaped_legacy_html(self):
-        source_html = r"""
-        <div class=\\"aqx-ingredient-item\\">
-          <span class=\\"aqx-ing-icon\\">🍚</span>
-          <span>دقيق: كوبان</span>
-        </div>
-        <div class=\\"aqx-step-card\\">
-          <div class=\\"aqx-step-content\\">
-            <strong>خلط المكونات:</strong> اخلطي الدقيق بالماء جيداً.
-          </div>
-        </div>
-        """
+        source_html = r'<div class=\"aqx-ingredient-item\"><span class=\"aqx-ing-icon\">🍚</span><span>دقيق: كوبان</span></div><div class=\"aqx-step-card\"><div class=\"aqx-step-content\"><strong>خلط المكونات:</strong> اخلطي الدقيق بالماء جيداً.</div></div>'
         result = parse_recipe_html(source_html, "عجينة القطايف", "https://aqxfood.blogspot.com/test")
         recipe = result["parsed_recipe"]
         self.assertEqual(recipe["ingredient_count"], 1)
