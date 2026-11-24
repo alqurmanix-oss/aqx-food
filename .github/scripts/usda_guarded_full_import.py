@@ -101,6 +101,8 @@ def main():
             if release_status == "imported":
                 results.append({"dataset": code, "version": version, "status": "already_imported", "records_sent": 0})
                 continue
+            if release_status in {"download_failed", "failed", "error"}:
+                raise RuntimeError(f"{code}: latest USDA release is in failure state {release_status}: {item.get('error_message') or 'no error detail'}")
             if release_status not in {"downloaded", "queued_for_import", "importing"}:
                 results.append({"dataset": code, "version": version, "status": f"not_ready:{release_status}", "records_sent": 0})
                 continue
