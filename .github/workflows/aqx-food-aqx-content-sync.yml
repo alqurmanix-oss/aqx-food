@@ -34,4 +34,17 @@ jobs:
       - name: Sync AQX Blogger source into private staging
         env:
           AQX_FOOD_CONTENT_SYNC_URL: https://vuszqzgldbsscuxdfhdz.supabase.co/functions/v1/aqx-food-github-content-sync
-        run: python .github/scripts/aqx_food_content_sync.py
+        run: |
+          for attempt in 1 2 3; do
+            echo "AQX content sync attempt ${attempt}/3"
+            if python .github/scripts/aqx_food_content_sync.py; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              delay=$((attempt * 30))
+              echo "Sync attempt failed; retrying in ${delay}s."
+              sleep "$delay"
+            fi
+          done
+          echo "AQX content sync failed after 3 attempts."
+          exit 1
