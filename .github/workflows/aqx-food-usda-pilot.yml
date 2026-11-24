@@ -1,0 +1,35 @@
+name: AQX Food USDA limited import pilot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/aqx-food-usda-pilot.yml
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aqx-food-usda-limited-pilot
+  cancel-in-progress: false
+
+jobs:
+  limited-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pilot dependencies
+        run: python -m pip install --disable-pip-version-check requests ijson
+      - name: Import at most five records from each USDA dataset
+        env:
+          AQX_FOOD_PILOT_URL: https://vuszqzgldbsscuxdfhdz.supabase.co/functions/v1/aqx-food-github-pilot
+        run: python .github/scripts/usda_pilot_import.py
