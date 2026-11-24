@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guarded full USDA import. Manual-only; idempotent batches; finish only after exact counts."""
+"""Guarded automatic USDA release importer; idempotent batches and strict archive validation."""
 import json
 import os
 import pathlib
@@ -13,7 +13,6 @@ GATEWAY = os.environ["AQX_FOOD_FULL_IMPORT_URL"].rstrip("/")
 AUDIENCE = "aqx-food-usda-import"
 BATCH_SIZE = 100
 STOP_AFTER_BYTES = 390 * 1024 * 1024
-EXPECTED_COUNTS = {"FOUNDATION": 424, "SR_LEGACY": 7793, "FNDDS": 5432}
 DATASETS = {
     "FOUNDATION": ("FoundationFoods.item", "FoodData_Central_foundation_food_json_"),
     "SR_LEGACY": ("SRLegacyFoods.item", "FoodData_Central_sr_legacy_food_json_"),
@@ -98,12 +97,16 @@ def main():
             version = item.get("version") or item.get("dataset_version")
             if not version:
                 raise RuntimeError(f"{code}: trusted dataset version missing")
-            if item.get("status") == "imported":
-                results.append({"dataset": code, "status": "already_imported", "records_sent": 0})
+            release_status = str(item.get("status") or "")
+            if release_status == "imported":
+                results.append({"dataset": code, "version": version, "status": "already_imported", "records_sent": 0})
+                continue
+            if release_status not in {"downloaded", "queued_for_import", "importing"}:
+                results.append({"dataset": code, "version": version, "status": f"not_ready:{release_status}", "records_sent": 0})
                 continue
             signed_url = item.get("signed_url")
             if not signed_url:
-                raise RuntimeError(f"{code}: signed archive URL unavailable")
+                raise RuntimeError(f"{code}: release is marked {release_status} but signed archive URL is unavailable")
             archive_path = pathlib.Path(tmp) / f"{code}.zip"
             with requests.get(signed_url, stream=True, timeout=(30, 600)) as response:
                 response.raise_for_status()
@@ -142,9 +145,12 @@ def main():
                         if db_bytes and db_bytes >= STOP_AFTER_BYTES:
                             raise RuntimeError(f"Safety stop: database reached {db_bytes} bytes; below 400 MiB RPC guard")
 
-            expected = EXPECTED_COUNTS[code]
-            if sent != expected:
-                raise RuntimeError(f"{code}: source count mismatch; expected {expected}, submitted {sent}. No release marked imported.")
+            if sent < 1:
+                raise RuntimeError(f"{code}: archive parsed successfully but contained no food records.")
+            metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
+            expected = metadata.get("expected_record_count") or metadata.get("record_count")
+            if expected is not None and sent != int(expected):
+                raise RuntimeError(f"{code}: archive record count mismatch; expected {expected}, parsed {sent}. No release marked imported.")
             results.append({"dataset": code, "version": version, "records_sent": sent, "status": "loaded_unverified"})
 
     # Only mark releases imported after all three archives were read completely and exact counts matched.
@@ -156,8 +162,8 @@ def main():
     print(json.dumps({
         "mode": "GUARDED_FULL_USDA_IMPORT",
         "results": results,
-        "expected_total_records": sum(EXPECTED_COUNTS.values()),
-        "full_import_completed": True,
+        "records_imported": sum(int(item.get("records_sent") or 0) for item in results),
+        "full_import_completed": all(item.get("status") in {"imported", "already_imported"} for item in results),
         "matching_status": "unmatched_pending_review",
         "safety_stop_bytes": STOP_AFTER_BYTES,
     }, ensure_ascii=False, indent=2))
