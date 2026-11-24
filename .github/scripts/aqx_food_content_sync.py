@@ -330,7 +330,10 @@ def main():
             "accepted_matches": int(match_result.get("accepted_matches") or 0),
             "auto_approval": bool(match_result.get("auto_approval")),
             "auto_acceptance_policy": match_result.get("auto_acceptance_policy"),
-            "all_nutrition_records_unverified": bool(match_result.get("all_nutrition_records_unverified")),
+            "verification_policy": match_result.get("verification_policy"),
+            "verified_ingredients": int(match_result.get("verified_ingredients") or 0),
+            "verified_nutrition_records": int(match_result.get("verified_nutrition_records") or 0),
+            "cross_dataset_consensus_pairs": int(match_result.get("cross_dataset_consensus_pairs") or 0),
             "live_records_published": int(match_result.get("live_records_published") or 0),
             "parse_merge_policy": "preserve_existing_ingredients_and_steps",
         }, ensure_ascii=False), flush=True)
