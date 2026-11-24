@@ -19,7 +19,7 @@ DECORATIVE_CLASSES = {
     "aqx-ing-icon", "aqx-ingredient-icon", "aqx-step-number", "icon",
 }
 METHOD_HEADING_RE = re.compile(
-    r"(طريقة\s*(?:التحضير|تحضير|عمل)|خطوات\s*(?:التحضير|العمل)|"
+    r"(طريقة\s*(?:التحضير|تحضير|عمل|إعداد|اعداد)|خطوات\s*(?:التحضير|العمل)|"
     r"preparation|instructions|method)", re.I
 )
 INGREDIENT_HEADING_RE = re.compile(r"(المكونات|المقادير|ingredients)", re.I)
