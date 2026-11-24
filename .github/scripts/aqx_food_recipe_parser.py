@@ -3,7 +3,7 @@ import html
 import re
 from html.parser import HTMLParser
 
-VERSION = "aqx-html-structured-v2"
+VERSION = "aqx-html-structured-v3"
 INGREDIENT_LIST_CLASSES = {
     "aqx-ing-list", "aqx-ingredients-list", "aqx-ingredient-list",
 }
@@ -18,8 +18,8 @@ DECORATIVE_INGREDIENT_CLASSES = {"aqx-check-icon", "aqx-ing-dot"}
 
 def clean(value):
     value = html.unescape(value or "")
-    value = re.sub(r"\\s+", " ", value)
-    return value.strip(" \\t\\r\\n•·-–—")
+    value = re.sub(r"\s+", " ", value)
+    return value.strip(" \t\r\n•·-–—")
 
 
 class RecipeHTMLParser(HTMLParser):
@@ -110,8 +110,8 @@ class RecipeHTMLParser(HTMLParser):
                     "raw_name": name,
                     "name_candidate": name,
                     "raw_quantity": quantity or None,
-                    "contains_multiple": bool(re.search(r"\\s(?:و|مع)\\s", name)),
-                    "contains_alternative": bool(re.search(r"\\bأو\\b|/|\\bor\\b", name, re.I)),
+                    "contains_multiple": bool(re.search(r"\s(?:و|مع)\s", name)),
+                    "contains_alternative": bool(re.search(r"\bأو\b|/|\bor\b", name, re.I)),
                     "extraction_method": "aqx_html_structured",
                 })
             self.current_li = None
