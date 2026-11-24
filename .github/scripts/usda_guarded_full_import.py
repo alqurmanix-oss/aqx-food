@@ -59,6 +59,30 @@ def normalize(record):
     }
 
 
+
+def ingest_batch(dataset_code, dataset_version, records):
+    """Retry statement-timeout batches by splitting them; each RPC is atomic."""
+    try:
+        return gateway(
+            "batch",
+            dataset_code=dataset_code,
+            dataset_version=dataset_version,
+            records=records,
+        )
+    except RuntimeError as exc:
+        if "statement timeout" not in str(exc).lower() or len(records) <= 1:
+            raise
+        midpoint = len(records) // 2
+        print(json.dumps({
+            "dataset": dataset_code,
+            "event": "batch_split_after_statement_timeout",
+            "records": len(records),
+            "parts": [midpoint, len(records) - midpoint],
+        }), flush=True)
+        ingest_batch(dataset_code, dataset_version, records[:midpoint])
+        return ingest_batch(dataset_code, dataset_version, records[midpoint:])
+
+
 def main():
     status_response = gateway("status")
     status = status_response.get("status")
@@ -103,7 +127,7 @@ def main():
                             raise RuntimeError(f"{code}: invalid record at source position {sent + len(batch) + 1}")
                         batch.append(normalize(record))
                         if len(batch) >= BATCH_SIZE:
-                            result = gateway("batch", dataset_code=code, dataset_version=version, records=batch)
+                            result = ingest_batch(code, version, batch)
                             sent += len(batch)
                             db_bytes = int(result.get("database_bytes") or 0)
                             print(json.dumps({"dataset": code, "records_sent": sent, "database_bytes": db_bytes}), flush=True)
@@ -111,7 +135,7 @@ def main():
                                 raise RuntimeError(f"Safety stop: database reached {db_bytes} bytes; below 400 MiB RPC guard")
                             batch = []
                     if batch:
-                        result = gateway("batch", dataset_code=code, dataset_version=version, records=batch)
+                        result = ingest_batch(code, version, batch)
                         sent += len(batch)
                         db_bytes = int(result.get("database_bytes") or 0)
                         print(json.dumps({"dataset": code, "records_sent": sent, "database_bytes": db_bytes}), flush=True)
