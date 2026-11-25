@@ -209,6 +209,28 @@ def make_record(entry):
     }
 
 
+def build_records(entries):
+    """Keep valid Blogger posts flowing while quarantining only empty feed entries."""
+    records = []
+    quarantined = []
+    for entry in entries:
+        try:
+            records.append(make_record(entry))
+        except RuntimeError as exc:
+            message = str(exc)
+            if "is missing title or full content" not in message:
+                raise
+            post_id = str((entry.get("id") or {}).get("$t") or "")
+            match = re.search(r"\.post-(\d+)$", post_id)
+            quarantined.append({
+                "post_id": match.group(1) if match else "unknown",
+                "reason": message[:240],
+            })
+    if not records:
+        raise RuntimeError("Blogger feed contained no valid posts after quarantining malformed entries")
+    return records, quarantined
+
+
 def oidc_token():
     request_url = os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
     request_token = os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]
@@ -260,6 +282,8 @@ def version_from_feed(feed_updated):
 def main():
     version = "blogger-" + dt.datetime.now(dt.timezone.utc).date().isoformat()
     records = []
+    quarantined_posts = []
+    raw_posts_received = 0
     inserted = 0
     updated = 0
     http_status = None
@@ -268,13 +292,17 @@ def main():
 
     try:
         entries, feed_updated, http_status = fetch_all_posts()
+        raw_posts_received = len(entries)
         version = version_from_feed(feed_updated)
-        records = [make_record(entry) for entry in entries]
+        records, quarantined_posts = build_records(entries)
         candidates = sum(1 for item in records if item["is_recipe_candidate"])
         print(json.dumps({
             "event": "aqx_blogger_feed_fetched",
             "dataset_version": version,
-            "posts_received": len(records),
+            "posts_received": raw_posts_received,
+            "valid_posts": len(records),
+            "quarantined_posts": len(quarantined_posts),
+            "quarantined_post_ids": [item["post_id"] for item in quarantined_posts[:10]],
             "recipe_candidates": candidates,
             "non_recipe_posts": len(records) - candidates,
             "http_status": http_status,
@@ -341,11 +369,15 @@ def main():
         finish = gateway({
             "action": "finish",
             "dataset_version": version,
-            "records_received": len(records),
+            "records_received": raw_posts_received,
             "records_inserted": inserted,
             "records_updated": updated,
             "http_status": http_status,
-            "error": None,
+            "error": (
+                f"Quarantined {len(quarantined_posts)} Blogger feed entries missing title or full content: "
+                + ", ".join(item["post_id"] for item in quarantined_posts[:10])
+                if quarantined_posts else None
+            ),
         }, token)
         finished = True
         print(json.dumps({"event": "aqx_content_sync_finished", **finish}, ensure_ascii=False), flush=True)
@@ -363,7 +395,7 @@ def main():
                 finish = gateway({
                     "action": "finish",
                     "dataset_version": version,
-                    "records_received": len(records),
+                    "records_received": raw_posts_received,
                     "records_inserted": inserted,
                     "records_updated": updated,
                     "http_status": http_status,
