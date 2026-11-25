@@ -1,5 +1,6 @@
 import unittest
 from aqx_food_recipe_parser import parse_recipe_html
+from aqx_food_content_sync import build_records
 
 
 class RecipeParserTests(unittest.TestCase):
@@ -168,6 +169,25 @@ class RecipeParserTests(unittest.TestCase):
             result["validation_errors"],
         )
 
+
+    def test_quarantines_only_blogger_entries_missing_title_or_content(self):
+        valid_entry = {
+            "id": {"$t": "tag:blogger.com,1999:blog-123.post-456"},
+            "link": [{"rel": "alternate", "href": "https://aqxfood.blogspot.com/valid-post.html"}],
+            "title": {"$t": "وصفة اختبار"},
+            "content": {"$t": "<p>محتوى الوصفة</p>"},
+        }
+        invalid_entry = {
+            "id": {"$t": "tag:blogger.com,1999:blog-123.post-789"},
+            "link": [{"rel": "alternate", "href": "https://aqxfood.blogspot.com/empty-post.html"}],
+            "title": {"$t": ""},
+            "content": {"$t": "<p></p>"},
+        }
+        records, quarantined = build_records([invalid_entry, valid_entry])
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["external_record_id"], "456")
+        self.assertEqual(len(quarantined), 1)
+        self.assertEqual(quarantined[0]["post_id"], "789")
 
 if __name__ == "__main__":
     unittest.main()
